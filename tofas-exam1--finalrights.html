@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>امتحان التوفاس – جافاسكريبت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root{
+  --ink:#0b0f1c;
+  --ink2:#141929;
+  --ink3:#1c2540;
+  --ink4:#253060;
+  --line:#2a3870;
+  --line2:#1a2550;
+  --gold:#f5c842;
+  --gold2:#e8b800;
+  --teal:#00e5c8;
+  --teal2:#00b8a0;
+  --red:#ff4d6d;
+  --green:#00d68f;
+  --blue:#4a9eff;
+  --txt:#dde3f5;
+  --txt2:#8090b8;
+  --txt3:#4a5880;
+  --code:#070b18;
+  --r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:var(--ink);
+  color:var(--txt);
+  font-family:'Cairo',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* noise texture overlay */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.4;
+}
+
+/* ═══════════════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════════════ */
+.screen{display:none}
+.screen.on{display:block}
+#S-intro.on{display:flex}
+
+/* ═══════════════════════════════════════════════
+   ■ INTRO
+═══════════════════════════════════════════════ */
+#S-intro{
+  min-height:100vh;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 20px;
+  position:relative;
+}
+#S-intro.on{display:flex}
+
+/* big decorative circles */
+#S-intro::before{
+  content:'';position:absolute;
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,200,66,.06) 0%,transparent 70%);
+  top:-100px;right:-150px;pointer-events:none;
+}
+#S-intro::after{content:'';display:none} /* kill body::after conflict */
+
+.intro-wrap{
+  max-width:680px;width:100%;
+  text-align:center;
+  position:relative;z-index:1;
+}
+
+.intro-kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--line);
+  border-radius:40px;padding:6px 18px;
+  font-size:.78rem;font-weight:600;
+  color:var(--gold);letter-spacing:.08em;
+  margin-bottom:28px;
+  background:rgba(245,200,66,.06);
+}
+.intro-kicker span{
+  width:6px;height:6px;background:var(--gold);
+  border-radius:50%;animation:blink 1.2s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.intro-h1{
+  font-size:clamp(2.2rem,6vw,3.6rem);
+  font-weight:900;line-height:1.15;
+  margin-bottom:14px;
+  color:#fff;
+}
+.intro-h1 em{
+  font-style:normal;
+  background:linear-gradient(90deg,var(--gold),#ffab00);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+
+.intro-sub{
+  color:var(--txt2);font-size:1rem;
+  max-width:460px;margin:0 auto 44px;
+  line-height:1.7;
+}
+
+/* stat row */
+.intro-stats{
+  display:flex;gap:14px;justify-content:center;
+  flex-wrap:wrap;margin-bottom:44px;
+}
+.istat{
+  background:var(--ink2);
+  border:1px solid var(--line2);
+  border-radius:var(--r);
+  padding:20px 28px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  min-width:130px;
+}
+.istat-val{font-size:2rem;font-weight:900;color:var(--gold)}
+.istat-lbl{font-size:.75rem;color:var(--txt2);font-weight:600}
+
+/* rules */
+.intro-rules{
+  background:var(--ink2);
+  border:1px solid var(--line2);
+  border-radius:var(--r);
+  padding:22px 26px;
+  text-align:right;
+  margin-bottom:36px;
+}
+.rules-head{
+  font-weight:700;font-size:.92rem;
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.rule{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid var(--line2);
+  font-size:.85rem;color:var(--txt2);
+  line-height:1.5;
+}
+.rule:last-child{border-bottom:none}
+.rule-dot{
+  width:6px;height:6px;background:var(--gold);
+  border-radius:50%;flex-shrink:0;margin-top:6px;
+}
+
+/* CTA */
+.cta-btn{
+  display:inline-flex;align-items:center;gap:12px;
+  background:var(--gold);color:#000;
+  font-family:'Cairo',sans-serif;font-weight:900;
+  font-size:1.05rem;padding:15px 48px;
+  border:none;border-radius:50px;cursor:pointer;
+  transition:all .22s;
+  box-shadow:0 8px 30px rgba(245,200,66,.35);
+}
+.cta-btn:hover{
+  background:var(--gold2);
+  transform:translateY(-3px);
+  box-shadow:0 14px 40px rgba(245,200,66,.5);
+}
+
+/* ═══════════════════════════════════════════════
+   ■ EXAM
+═══════════════════════════════════════════════ */
+#S-exam{position:relative}
+
+/* ── sticky header ── */
+#exam-hdr{
+  position:sticky;top:0;z-index:200;
+  background:rgba(11,15,28,.97);
+  border-bottom:1px solid var(--line2);
+  backdrop-filter:blur(18px);
+}
+
+.hdr-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 20px;gap:12px;flex-wrap:wrap;
+}
+
+.hdr-logo{
+  font-weight:900;font-size:.95rem;
+  color:var(--gold);letter-spacing:.04em;
+  display:flex;align-items:center;gap:8px;
+}
+.hdr-logo-dot{
+  width:8px;height:8px;background:var(--gold);
+  border-radius:50%;
+}
+
+/* timer */
+.timer-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--ink2);border:1px solid var(--line);
+  border-radius:10px;padding:8px 18px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.05rem;font-weight:600;
+  transition:all .3s;
+}
+.timer-box.warn{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(245,200,66,.2)}
+.timer-box.danger{border-color:var(--red);color:var(--red);box-shadow:0 0 14px rgba(255,77,109,.25);animation:pulse-box .5s infinite alternate}
+@keyframes pulse-box{from{transform:scale(1)}to{transform:scale(1.03)}}
+
+.hdr-pills{display:flex;gap:8px;flex-wrap:wrap}
+.hpill{
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:8px;padding:5px 13px;
+  font-size:.75rem;display:flex;align-items:center;gap:5px;
+}
+.hpill strong{font-size:.9rem}
+.hpill.g strong{color:var(--green)}
+.hpill.r strong{color:var(--red)}
+.hpill.b strong{color:var(--blue)}
+
+/* progress line */
+.prog-line{height:3px;background:var(--ink3)}
+.prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--gold),var(--teal));
+  transition:width .4s cubic-bezier(.4,0,.2,1);
+}
+
+/* question dots nav */
+.dots-rail{
+  display:flex;align-items:center;gap:5px;
+  padding:9px 16px;overflow-x:auto;
+  scrollbar-width:thin;scrollbar-color:var(--line) transparent;
+}
+.dots-rail::-webkit-scrollbar{height:2px}
+.dots-rail::-webkit-scrollbar-thumb{background:var(--line)}
+
+.qdot{
+  width:28px;height:28px;border-radius:50%;
+  border:1.5px solid var(--line);
+  font-size:.68rem;font-weight:700;
+  cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;background:var(--ink3);color:var(--txt3);
+}
+.qdot:hover{border-color:var(--gold);color:var(--txt)}
+.qdot.done{border-color:var(--green);color:var(--green);background:rgba(0,214,143,.08)}
+.qdot.cur{border-color:var(--gold);color:var(--gold);background:rgba(245,200,66,.1);box-shadow:0 0 10px rgba(245,200,66,.25)}
+
+/* ── exam body ── */
+#exam-body{padding:20px 16px 80px}
+.exam-wrap{max-width:1100px;margin:0 auto}
+
+/* question card */
+.qcard{
+  background:var(--ink2);
+  border:1px solid var(--line2);
+  border-radius:18px;overflow:hidden;
+  animation:slide-up .35s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.qcard-head{
+  background:linear-gradient(135deg,rgba(245,200,66,.07) 0%,rgba(0,229,200,.04) 100%);
+  border-bottom:1px solid var(--line2);
+  padding:20px 26px;
+  display:flex;align-items:flex-start;gap:14px;
+}
+.qbadge{
+  background:var(--gold);color:#000;
+  font-weight:900;font-size:.8rem;
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.qmeta{flex:1}
+.qtag{
+  display:inline-block;
+  background:rgba(0,229,200,.1);
+  border:1px solid rgba(0,229,200,.22);
+  color:var(--teal);font-size:.68rem;
+  padding:2px 10px;border-radius:20px;margin-bottom:7px;
+}
+.qtext{font-size:.97rem;font-weight:700;line-height:1.7;color:#fff;margin-bottom:0}
+
+/* expected output box — matches PDF style */
+.q-expected-wrap{margin-top:12px}
+.q-expected-lbl{
+  font-size:.68rem;font-weight:700;color:var(--txt3);
+  letter-spacing:.07em;margin-bottom:6px;
+  text-transform:uppercase;
+}
+.q-expected-box{
+  background:var(--code);
+  border:1px solid rgba(245,200,66,.25);
+  border-right:3px solid var(--gold);
+  border-radius:8px;
+  padding:10px 14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.78rem;line-height:1.9;
+  color:var(--gold);
+  direction:rtl;text-align:right;
+  white-space:pre-wrap;
+}
+
+/* code block */
+.code-box{
+  margin:18px 26px;
+  background:var(--code);
+  border:1px solid #1a2540;
+  border-radius:12px;overflow:hidden;
+}
+.code-bar{
+  background:#0d1220;border-bottom:1px solid #1a2540;
+  padding:8px 14px;display:flex;align-items:center;gap:6px;
+}
+.cd{width:9px;height:9px;border-radius:50%}
+.cd-r{background:#ff5f57}.cd-y{background:#febc2e}.cd-g{background:#28c840}
+.code-lang{margin-right:auto;font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--txt3)}
+.code-pre{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.76rem;line-height:1.8;
+  padding:16px 18px;direction:ltr;text-align:left;
+  color:#a8b5d8;white-space:pre;overflow-x:auto;
+}
+
+/* options */
+.opts{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:14px;padding:16px 20px;
+}
+@media(max-width:640px){.opts{grid-template-columns:1fr 1fr}}
+
+.opt{
+  background:#ffffff;
+  border:2px solid #d0d8e8;
+  border-radius:14px;padding:16px 18px;
+  cursor:pointer;text-align:right;
+  transition:border-color .15s,background .15s,box-shadow .15s,transform .15s;
+  font-family:'Cairo',sans-serif;color:#111827;
+  min-width:0;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.opt:hover:not([disabled]):not(.picked){
+  border-color:var(--gold);
+  background:#fffdf0;
+  box-shadow:0 4px 16px rgba(245,200,66,.25);
+  transform:translateY(-2px);
+}
+.opt.picked{border-color:var(--gold);background:#fff9e0;box-shadow:0 4px 16px rgba(245,200,66,.3)}
+.opt.show-right{border-color:var(--green)!important;background:#f0fdf6!important;box-shadow:0 4px 14px rgba(0,214,143,.2)!important}
+.opt.show-wrong{border-color:var(--red)!important;background:#fff1f4!important;box-shadow:0 4px 14px rgba(255,77,109,.15)!important}
+
+.opt-lbl{font-size:.75rem;font-weight:800;color:#6b7280;margin-bottom:5px;letter-spacing:.06em;display:flex;align-items:center;gap:4px}
+.correct-mark{color:#00d68f;font-size:.85rem;font-weight:900}
+.opt-txt{font-size:.88rem;font-weight:700;line-height:1.55;word-break:break-word;color:#111827}
+.opt-code{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.68rem;direction:ltr;text-align:left;
+  background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;
+  padding:10px 12px;margin-top:10px;
+  white-space:pre-wrap;word-break:break-all;overflow:hidden;line-height:1.75;
+  color:#1e293b;
+  max-width:100%;
+  display:block;
+}
+
+/* hint / reveal box */
+.info-box{
+  display:none;
+  margin:0 26px 16px;
+  padding:14px 17px;
+  border-radius:10px;
+  font-size:.84rem;line-height:1.65;
+  animation:slide-up .25s;
+  gap:10px;align-items:flex-start;
+}
+.info-box.show{display:flex}
+.info-box.hint-style{
+  background:rgba(74,158,255,.08);
+  border:1px solid rgba(74,158,255,.25);
+  color:#a3c4ff;
+}
+.info-box.reveal-style{
+  background:rgba(0,214,143,.07);
+  border:1px solid rgba(0,214,143,.25);
+  color:#6ee7b7;
+}
+.info-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+
+/* footer controls */
+.qcard-foot{
+  padding:14px 26px;
+  border-top:1px solid var(--line2);
+  display:flex;align-items:center;gap:10px;
+  flex-wrap:wrap;
+}
+
+/* button styles */
+.btn{
+  font-family:'Cairo',sans-serif;
+  font-weight:700;font-size:.84rem;
+  padding:9px 20px;border:none;
+  border-radius:50px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+  transition:all .18s;
+}
+.btn-ghost{
+  background:var(--ink3);
+  border:1px solid var(--line);
+  color:var(--txt2);
+}
+.btn-ghost:hover:not([disabled]){border-color:var(--txt2);color:var(--txt)}
+.btn-ghost[disabled]{opacity:.35;cursor:not-allowed}
+
+.btn-hint{
+  background:rgba(74,158,255,.1);
+  border:1px solid rgba(74,158,255,.25);
+  color:#7db8ff;
+}
+.btn-hint:hover{background:rgba(74,158,255,.18);border-color:rgba(74,158,255,.45)}
+
+.btn-reveal{
+  background:rgba(245,200,66,.1);
+  border:1px solid rgba(245,200,66,.25);
+  color:var(--gold);
+}
+.btn-reveal:hover{background:rgba(245,200,66,.18);border-color:rgba(245,200,66,.45)}
+
+.btn-next{
+  background:var(--teal2);color:#000;
+  font-weight:900;
+  box-shadow:0 4px 14px rgba(0,184,160,.3);
+}
+.btn-next:hover{background:var(--teal);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,229,200,.4)}
+
+.btn-submit{
+  background:var(--gold);color:#000;
+  font-weight:900;
+  box-shadow:0 4px 14px rgba(245,200,66,.35);
+  margin-right:auto;display:none;
+}
+.btn-submit:hover{background:var(--gold2);transform:translateY(-2px)}
+
+/* ═══════════════════════════════════════════════
+   ■ OVERLAYS
+═══════════════════════════════════════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.82);
+  z-index:500;align-items:center;justify-content:center;
+  backdrop-filter:blur(10px);
+}
+.overlay.on{display:flex}
+
+.obox{
+  background:var(--ink2);
+  border:1px solid var(--line);
+  border-radius:20px;padding:40px 36px;
+  text-align:center;max-width:420px;width:90%;
+  animation:pop .38s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop{from{transform:scale(.75);opacity:0}to{transform:scale(1);opacity:1}}
+
+.obox-icon{font-size:3rem;margin-bottom:16px}
+.obox-title{font-size:1.45rem;font-weight:900;margin-bottom:10px;color:#fff}
+.obox-sub{font-size:.88rem;color:var(--txt2);margin-bottom:28px;line-height:1.6}
+.obox-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+.btn-cancel{
+  background:var(--ink3);border:1px solid var(--line);
+  color:var(--txt2);font-family:'Cairo',sans-serif;
+  font-weight:700;font-size:.9rem;
+  padding:11px 28px;border-radius:50px;cursor:pointer;
+  transition:all .18s;
+}
+.btn-cancel:hover{border-color:var(--txt2);color:var(--txt)}
+
+.btn-confirm{
+  background:var(--gold);color:#000;
+  font-family:'Cairo',sans-serif;font-weight:900;
+  font-size:.9rem;padding:11px 28px;
+  border:none;border-radius:50px;cursor:pointer;
+  transition:all .18s;
+  box-shadow:0 4px 14px rgba(245,200,66,.4);
+}
+.btn-confirm:hover{background:var(--gold2);transform:translateY(-2px)}
+
+/* ═══════════════════════════════════════════════
+   ■ REVIEW
+═══════════════════════════════════════════════ */
+#S-review{position:relative}
+
+.rev-hdr{
+  position:sticky;top:0;z-index:200;
+  background:rgba(11,15,28,.97);
+  border-bottom:1px solid var(--line2);
+  backdrop-filter:blur(18px);
+}
+.rev-hdr-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;max-width:900px;margin:0 auto;
+}
+.rev-title{font-weight:900;font-size:1.05rem;color:#fff}
+.rev-time{font-size:.78rem;color:var(--txt2)}
+
+/* big score circle */
+.score-ring-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:32px;
+}
+.score-ring{
+  position:relative;width:160px;height:160px;
+  margin-bottom:16px;
+}
+.score-ring svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--ink3);stroke-width:10}
+.ring-fill{fill:none;stroke:url(#ringGrad);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)}
+.ring-center{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.ring-pct{font-size:2rem;font-weight:900;color:#fff}
+.ring-lbl{font-size:.72rem;color:var(--txt2);margin-top:2px}
+.score-verdict{font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:6px}
+.score-sub{font-size:.85rem;color:var(--txt2)}
+
+/* summary cards */
+.rev-summary{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:12px;margin-bottom:28px;
+}
+@media(max-width:560px){.rev-summary{grid-template-columns:1fr 1fr}}
+
+.rscard{
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:var(--r);padding:18px;text-align:center;
+}
+.rscard-n{font-size:1.9rem;font-weight:900;margin-bottom:2px}
+.rscard-l{font-size:.72rem;color:var(--txt2)}
+.rscard-n.g{color:var(--green)}
+.rscard-n.r{color:var(--red)}
+.rscard-n.y{color:var(--gold)}
+.rscard-n.b{color:var(--blue)}
+
+/* progress bar above review body */
+.rev-prog{height:4px;background:var(--ink3)}
+.rev-prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));transition:width .6s}
+
+.rev-body{padding:28px 20px 60px}
+.rev-wrap{max-width:900px;margin:0 auto}
+
+/* filter tabs */
+.rev-tabs{
+  display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;
+}
+.rtab{
+  font-family:'Cairo',sans-serif;
+  font-size:.78rem;font-weight:700;
+  padding:7px 18px;border-radius:50px;
+  border:1px solid var(--line);
+  background:var(--ink3);color:var(--txt2);
+  cursor:pointer;transition:all .15s;
+}
+.rtab.on{border-color:var(--gold);color:var(--gold);background:rgba(245,200,66,.08)}
+
+/* review question cards */
+.rq-list{display:flex;flex-direction:column;gap:12px}
+
+.rqcard{
+  background:var(--ink2);
+  border:1px solid var(--line2);
+  border-radius:14px;overflow:hidden;
+  transition:border-color .2s;
+}
+.rqcard.rc{border-color:rgba(0,214,143,.3)}
+.rqcard.rw{border-color:rgba(255,77,109,.28)}
+.rqcard.rs{border-color:rgba(245,200,66,.22)}
+
+.rqcard-head{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 18px;cursor:pointer;user-select:none;
+}
+.rq-icon{font-size:1rem;flex-shrink:0}
+.rq-meta-wrap{flex:1;min-width:0}
+.rq-num-tag{font-size:.67rem;color:var(--txt3);font-weight:700;margin-bottom:2px}
+.rq-q-short{font-size:.86rem;font-weight:700;line-height:1.45;color:var(--txt)}
+.rq-chevron{color:var(--txt3);transition:transform .25s;font-size:.85rem;flex-shrink:0}
+.rqcard.open .rq-chevron{transform:rotate(180deg)}
+
+.rq-body{display:none;padding:0 18px 16px}
+.rqcard.open .rq-body{display:block}
+
+.rq-code-pre{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.7rem;background:var(--code);
+  border:1px solid #1a2540;border-radius:8px;
+  padding:12px 14px;direction:ltr;text-align:left;
+  white-space:pre;overflow-x:auto;line-height:1.7;
+  color:#8090b8;margin-bottom:12px;
+}
+.rq-opts{display:flex;flex-direction:column;gap:6px}
+.rqopt{
+  padding:10px 13px;border-radius:8px;
+  border:1px solid var(--line2);
+  font-size:.83rem;background:var(--ink3);
+  display:flex;align-items:flex-start;gap:8px;
+}
+.rqopt.sel-ok{border-color:var(--green);background:rgba(0,214,143,.08);color:#6ee7b7}
+.rqopt.sel-bad{border-color:var(--red);background:rgba(255,77,109,.07);color:#fca5a5}
+.rqopt.is-right{border-color:var(--green);background:rgba(0,214,143,.05);color:#6ee7b7}
+.rqopt-icon{flex-shrink:0;margin-top:1px}
+.rq-expl{
+  margin-top:12px;padding:12px 14px;
+  background:rgba(0,229,200,.07);
+  border:1px solid rgba(0,229,200,.18);
+  border-radius:8px;font-size:.81rem;
+  color:#5ee0d4;line-height:1.65;
+}
+
+/* restart */
+.restart-zone{text-align:center;padding:36px 0}
+.restart-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--gold);color:#000;
+  font-family:'Cairo',sans-serif;font-weight:900;
+  font-size:1rem;padding:13px 40px;
+  border:none;border-radius:50px;cursor:pointer;
+  box-shadow:0 6px 24px rgba(245,200,66,.35);
+  transition:all .22s;
+}
+.restart-btn:hover{background:var(--gold2);transform:translateY(-3px);box-shadow:0 10px 32px rgba(245,200,66,.5)}
+
+/* ── copyright bar ── */
+#copyright-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(135deg,#0d1b2a 0%,#1a2f4a 100%);
+  border-top:1px solid rgba(245,200,66,.3);
+  padding:8px 24px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-family:'Cairo',sans-serif;
+  font-size:.72rem;color:#b0bec5;
+  user-select:none;
+}
+#copyright-bar .cr-icon{color:#f5c842;font-size:.85rem}
+#copyright-bar .cr-name{color:#f5c842;font-weight:700;letter-spacing:.04em}
+#copyright-bar .cr-dot{color:#4a6080;font-size:.6rem}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     INTRO
+════════════════════════════════════════ -->
+<section id="S-intro" class="screen on">
+  <div class="intro-wrap">
+    <div class="intro-kicker"><span></span> امتحان محاكي حقيقي</div>
+    <h1 class="intro-h1">امتحان التوفاس<br><em>جافاسكريبت</em></h1>
+    <p class="intro-sub">25 سؤالاً مستخرجاً من النماذج الرسمية — مع مؤقت، مساعدة، ومراجعة تفصيلية بعد الانتهاء</p>
+
+    <div class="intro-stats">
+      <div class="istat"><div class="istat-val">25</div><div class="istat-lbl">سؤال</div></div>
+      <div class="istat"><div class="istat-val">40</div><div class="istat-lbl">دقيقة</div></div>
+      <div class="istat"><div class="istat-val">60%</div><div class="istat-lbl">للنجاح</div></div>
+    </div>
+
+    <div class="intro-rules">
+      <div class="rules-head">📋 تعليمات الامتحان</div>
+      <div class="rule"><div class="rule-dot"></div><span>يمكنك التنقل بحرية بين الأسئلة في أي وقت</span></div>
+      <div class="rule"><div class="rule-dot"></div><span>لن تظهر الإجابة الصحيحة إلا عند الضغط على <strong>أظهر الإجابة</strong></span></div>
+      <div class="rule"><div class="rule-dot"></div><span>زر <strong>مساعدة</strong> يعطيك تلميحاً بدون كشف الإجابة</span></div>
+      <div class="rule"><div class="rule-dot"></div><span>بعد التسليم ستحصل على مراجعة كاملة لجميع أسئلتك</span></div>
+      <div class="rule"><div class="rule-dot"></div><span>الوقت المتاح 40 دقيقة — ينتهي الامتحان تلقائياً عند انتهاء الوقت</span></div>
+    </div>
+
+    <button class="cta-btn" onclick="startExam()">ابدأ الامتحان ←</button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     EXAM
+════════════════════════════════════════ -->
+<section id="S-exam" class="screen">
+
+  <div id="exam-hdr">
+    <div class="hdr-top">
+      <div class="hdr-logo"><div class="hdr-logo-dot"></div>التوفاس JS</div>
+
+      <div class="timer-box" id="timer-box">
+        <span>⏱</span>
+        <span id="timer-txt">40:00</span>
+      </div>
+
+      <div class="hdr-pills">
+        <div class="hpill g">✓ <strong id="hp-done">0</strong> أُجيب</div>
+        <div class="hpill r">— <strong id="hp-left">25</strong> متبقي</div>
+        <div class="hpill b"># <strong id="hp-cur">1/25</strong></div>
+      </div>
+    </div>
+
+    <div class="prog-line"><div class="prog-fill" id="prog-fill" style="width:4%"></div></div>
+    <div class="dots-rail" id="dots-rail"></div>
+  </div>
+
+  <div id="exam-body">
+    <div class="exam-wrap">
+      <div class="qcard" id="qcard">
+
+        <div class="qcard-head">
+          <div class="qbadge" id="q-badge">1</div>
+          <div class="qmeta">
+            <div class="qtag" id="q-tag">تحديد الناتج</div>
+            <div class="qtext" id="q-text"></div>
+          </div>
+        </div>
+
+        <div class="code-box" id="q-code-box">
+          <div class="code-bar">
+            <div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div>
+            <span class="code-lang">JavaScript</span>
+          </div>
+          <pre class="code-pre" id="q-code-pre"></pre>
+        </div>
+
+        <div class="opts" id="q-opts"></div>
+
+        <div class="info-box hint-style" id="hint-box">
+          <span class="info-icon">💡</span>
+          <span id="hint-txt"></span>
+        </div>
+        <div class="info-box reveal-style" id="reveal-box">
+          <span class="info-icon">✅</span>
+          <span id="reveal-txt"></span>
+        </div>
+
+        <div class="qcard-foot">
+          <button class="btn btn-ghost" id="btn-prev" onclick="nav(-1)">← السابق</button>
+          <button class="btn btn-hint" id="btn-hint" onclick="toggleHint()">💡 مساعدة</button>
+          <button class="btn btn-reveal" id="btn-reveal" onclick="doReveal()">👁 أظهر الإجابة</button>
+          <button class="btn btn-next" id="btn-next" onclick="nav(1)">التالي ←</button>
+          <button class="btn btn-submit" id="btn-submit" onclick="askSubmit()">✓ تسليم الامتحان</button>
+        </div>
+
+      </div><!-- /qcard -->
+    </div>
+  </div>
+
+</section>
+
+<!-- ════════════════════════════════════════
+     OVERLAY: TIME UP
+════════════════════════════════════════ -->
+<div class="overlay" id="ov-time">
+  <div class="obox">
+    <div class="obox-icon">⏰</div>
+    <div class="obox-title">انتهى الوقت!</div>
+    <div class="obox-sub">انتهى وقت الامتحان. سيتم الانتقال إلى صفحة المراجعة.</div>
+    <div class="obox-btns">
+      <button class="btn-confirm" onclick="finishExam()">عرض النتائج →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     OVERLAY: SUBMIT CONFIRM
+════════════════════════════════════════ -->
+<div class="overlay" id="ov-submit">
+  <div class="obox">
+    <div class="obox-icon">📋</div>
+    <div class="obox-title" id="ov-submit-title">تأكيد التسليم</div>
+    <div class="obox-sub" id="ov-submit-sub"></div>
+    <div class="obox-btns">
+      <button class="btn-cancel" onclick="closeOv('ov-submit')">العودة</button>
+      <button class="btn-confirm" onclick="finishExam()">تسليم ومراجعة →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     REVIEW
+════════════════════════════════════════ -->
+<section id="S-review" class="screen">
+
+  <div class="rev-hdr">
+    <div class="rev-hdr-inner">
+      <div class="rev-title">📊 مراجعة الامتحان</div>
+      <div class="rev-time" id="rev-time-lbl"></div>
+    </div>
+    <div class="rev-prog"><div class="rev-prog-fill" id="rev-prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="rev-body">
+    <div class="rev-wrap">
+
+      <!-- score ring -->
+      <div class="score-ring-wrap">
+        <div class="score-ring">
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#f5c842"/>
+                <stop offset="100%" stop-color="#00e5c8"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="80" cy="80" r="68"/>
+            <circle class="ring-fill" id="ring-fill" cx="80" cy="80" r="68"
+              stroke-dasharray="427.26" stroke-dashoffset="427.26"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-pct" id="ring-pct">0%</div>
+            <div class="ring-lbl">النتيجة</div>
+          </div>
+        </div>
+        <div class="score-verdict" id="score-verdict"></div>
+        <div class="score-sub" id="score-sub"></div>
+      </div>
+
+      <div class="rev-summary">
+        <div class="rscard"><div class="rscard-n g" id="rs-ok">0</div><div class="rscard-l">صحيح</div></div>
+        <div class="rscard"><div class="rscard-n r" id="rs-bad">0</div><div class="rscard-l">خاطئ</div></div>
+        <div class="rscard"><div class="rscard-n y" id="rs-skip">0</div><div class="rscard-l">لم يُجب</div></div>
+        <div class="rscard"><div class="rscard-n b" id="rs-total">25</div><div class="rscard-l">إجمالي</div></div>
+      </div>
+
+      <div class="rev-tabs">
+        <button class="rtab on" onclick="setTab('all',this)">الكل</button>
+        <button class="rtab" onclick="setTab('correct',this)">✓ صحيح</button>
+        <button class="rtab" onclick="setTab('wrong',this)">✗ خاطئ</button>
+        <button class="rtab" onclick="setTab('skipped',this)">— لم يُجب</button>
+      </div>
+
+      <div class="rq-list" id="rq-list"></div>
+
+      <div class="restart-zone">
+        <button class="restart-btn" onclick="restartExam()">🔁 إعادة الامتحان من البداية</button>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- ════════════════════════════════════════
+     SCRIPT
+════════════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════
+   QUESTIONS DATA
+═══════════════════════════════════════════════ */
+const QS = [
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"سأقوم بشراء قميص\nسأقوم بشراء بنطال",
+    code:null,
+    hint:"ركّز على شرط إيقاف الحلقة — هل يستخدم .length؟ وراجع ترتيب عناصر المصفوفة.",
+    explanation:"يجب استخدام clothesList.length كشرط للحلقة. المصفوفة: قميص[0]، بنطال[1]، سروة[2]. الحلقة تستثني سروة فتطبع قميص وبنطال.",
+    opts:[
+      {l:"A",t:"for بدون .length",c:`let clothesList = ["قميص","سروة","بنطال"];\nfor (let i = 0; i < clothesList; i++) {\n  if (!(clothesList[i] == "سروة")) {\n    console.log("سأقوم بشراء" + clothesList[i]);\n  }\n}`,ok:false},
+      {l:"B",t:"ترتيب مصفوفة خاطئ — بدون .length",c:`let clothesList = ["قميص","بنطال","سروة"];\nfor (let i = 0; i < clothesList; i++) {\n  if (!(clothesList[i] == "سروة")) {\n    console.log("سأقوم بشراء " + clothesList[i]);\n  }\n}`,ok:false},
+      {l:"C",t:"for مع .length وترتيب صحيح",c:`let clothesList = ["قميص","بنطال","سروة"];\nfor (let i = 0; i < clothesList.length; i++) {\n  if (!(clothesList[i] == "سروة")) {\n    console.log("سأقوم بشراء " + clothesList[i]);\n  }\n}`,ok:true},
+      {l:"D",t:"سروة في البداية",c:`let clothesList = ["سروة","قميص","بنطال"];\nfor (let i = 0; i < clothesList.length; i++) {\n  if (!(clothesList[i] == "سروة")) {\n    console.log("سأقوم بشراء " + clothesList[i]);\n  }\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"تم الانتهاء من تنظيف الحمام\nتم الانتهاء من تنظيف الغرفة\nتم الانتهاء من غسل الملابس\nتم الانتهاء من الوظائف",
+    code:null,
+    hint:"for loop مع .length تمر على كل عناصر المصفوفة. لا تستخدم if مكان for.",
+    explanation:"نستخدم for مع taskList.length لنمر على كل العناصر ونطبع 'تم الانتهاء من ' + كل عنصر.",
+    opts:[
+      {l:"A",t:"for مع .length",c:`let taskList = ["تنظيف الحمام","تنظيف الغرفة","غسل الملابس","الوظائف"];\nfor (let i = 0; i < taskList.length; i++) {\n  console.log("تم الانتهاء من " + taskList[i]);\n}`,ok:true},
+      {l:"B",t:"if بدلاً من for",c:`let taskList = ["تنظيف الحمام","تنظيف الغرفة","غسل الملابس","الوظائف"];\nif (let i = 0; i < taskList; i++) {\n  console.log("تم الانتهاء من " + taskList[i]);\n}`,ok:false},
+      {l:"C",t:"for بدون .length",c:`let taskList = ["تنظيف الحمام","تنظيف الغرفة","غسل الملابس","الوظائف"];\nfor (let i = 0; i < taskList; i++) {\n  console.log("تم الانتهاء من " + taskList[i]);\n}`,ok:false},
+      {l:"D",t:"حلقة بعدد ثابت 3",c:`let taskList = ["تنظيف الحمام","تنظيف الغرفة","غسل الملابس","الوظائف"];\nfor (let i = 0; i < 3; i++) {\n  console.log("تم الانتهاء من " + taskList[i]);\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"تحصل على 3 أضعاف النقاط في يوم 3\nالشحن مجاني",
+    code:null,
+    hint:"شرطان منفصلان: الأول يتحقق أن date == '3' كنص، والثاني يتحقق أن عدد عناصر السلة أكبر من 3 باستخدام .length.",
+    explanation:"if(date=='3') للنقاط، وif(shoppingBasket.length > 3) للشحن المجاني. السلة تحتوي 5 عناصر وهو أكبر من 3.",
+    opts:[
+      {l:"A",t:"date=='3' و .length > 3",c:`let shoppingBasket = ["يولي","حذاء رياضي","حاسوب","رولات","مائلا"];\nlet date = "3";\n\nif (date == "3") {\n  console.log("تحصل على 3 أضعاف النقاط في يوم " + date);\n}\nif (shoppingBasket.length > 3) {\n  console.log("الشحن مجاني");\n}`,ok:true},
+      {l:"B",t:"سلة أقل من 3 عناصر",c:`let shoppingBasket = ["مائلا","رولات","حاسوب"];\nlet date = "3";\n\nif (date == "3") {\n  console.log("تحصل على 3 أضعاف النقاط في يوم " + date);\n}\nif (shoppingBasket.length > 3) {\n  console.log("الشحن مجاني");\n}`,ok:false},
+      {l:"C",t:"basket > 3 بدون .length",c:`let shoppingBasket = ["يولي","حاسوب","رولات","مائلا"];\nlet date = "3";\n\nif (date == "3") {\n  console.log("تحصل على 3 أضعاف النقاط في يوم " + date);\n}\nif (shoppingBasket > 3) {\n  console.log("الشحن مجاني");\n}`,ok:false},
+      {l:"D",t:"date == 3 كرقم",c:`let shoppingBasket = ["يولي","حذاء رياضي","حاسوب","رولات","مائلا"];\nlet date = "3";\n\nif (date == 3) {\n  console.log("تحصل على 3 أضعاف النقاط في يوم " + date);\n}\nif (shoppingBasket.length > 3) {\n  console.log("الشحن مجاني");\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"يوتا هو السكرتير\nشون هو قائد المجموعة",
+    code:null,
+    hint:"ترتيب الطباعة يعتمد على ترتيب العناصر في المصفوفة. يوتا قبل شون في المصفوفة فيُطبع أولاً.",
+    explanation:"الحلقة تمر بالترتيب: تاكويا[0] لا ينطبق عليه شيء، يوتا[1] → سكرتير، شون[2] → قائد، كونا[3] لا ينطبق.",
+    opts:[
+      {l:"A",t:"for مع .length وترتيب صحيح",c:`let memberList = ["تاكويا","يوتا","شون","كونا"];\nlet leader = "شون";\nlet secretary = "يوتا";\n\nfor (let i = 0; i < memberList.length; i++) {\n  if (memberList[i] == leader) {\n    console.log(memberList[i] + " هو قائد المجموعة");\n  } else if (memberList[i] == secretary) {\n    console.log(memberList[i] + " هو السكرتير");\n  }\n}`,ok:true},
+      {l:"B",t:"for بدون .length",c:`let memberList = ["تاكويا","يوتا","شون","كونا"];\nlet leader = "شون";\nlet secretary = "يوتا";\n\nfor (let i = 0; i < memberList; i++) {\n  if (memberList[i] == leader) {\n    console.log(memberList[i] + " هو قائد المجموعة");\n  } else if (memberList[i] == secretary) {\n    console.log(memberList[i] + " هو السكرتير");\n  }\n}`,ok:false},
+      {l:"C",t:"شون قبل يوتا في المصفوفة",c:`let memberList = ["تاكويا","شون","يوتا","كونا"];\nlet leader = "شون";\nlet secretary = "يوتا";\n\nfor (let i = 0; i < memberList.length; i++) {\n  if (memberList[i] == leader) {\n    console.log(memberList[i] + " هو قائد المجموعة");\n  } else if (memberList[i] == secretary) {\n    console.log(memberList[i] + " هو السكرتير");\n  }\n}`,ok:false},
+      {l:"D",t:"بدون حلقة — شرط واحد فقط",c:`let memberList = ["تاكويا","يوتا","شون","كونا"];\nif (memberList[1] == "شون") {\n  console.log("شون هو السكرتير");\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"قائمة اليوم هي كالتالي\nسندويش\nسلطة\nقهوة",
+    code:null,
+    hint:"console.log(menuList) يطبع المصفوفة كلها. console.log(menuList[i]) يطبع عنصراً واحداً. كذلك تأكد من ترتيب المصفوفة.",
+    explanation:"الترتيب: سندويش[0]، سلطة[1]، قهوة[2]. نستخدم menuList[i] داخل الحلقة لطباعة كل عنصر على حدة.",
+    opts:[
+      {l:"A",t:"مصفوفة بدون [] — صياغة خاطئة",c:`let menuList = ["قهوة"],["سلطة"],["سندويش"];\nconsole.log("قائمة اليوم هي كالتالي");\nfor (let i = 0; i < 3; i++) {\n  console.log(menuList);\n}`,ok:false},
+      {l:"B",t:"ترتيب معكوس: قهوة، سلطة، سندويش",c:`let menuList = ["قهوة","سلطة","سندويش"];\nconsole.log("قائمة اليوم هي كالتالي");\nfor (let i = 0; i < 3; i++) {\n  console.log(menuList[i]);\n}`,ok:false},
+      {l:"C",t:"ترتيب صحيح مع [i]",c:`let menuList = ["سندويش","سلطة","قهوة"];\nconsole.log("قائمة اليوم هي كالتالي");\nfor (let i = 0; i < 3; i++) {\n  console.log(menuList[i]);\n}`,ok:true},
+      {l:"D",t:"ترتيب صحيح لكن بدون [i]",c:`let menuList = ["سندويش","سلطة","قهوة"];\nconsole.log("قائمة اليوم هي كالتالي");\nfor (let i = 0; i < 3; i++) {\n  console.log(menuList);\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"سيتم تطبيق خصم للأطفال أو كبار السن\nالسعر العادي\nسيتم تطبيق خصم للأطفال أو كبار السن",
+    code:null,
+    hint:"'أو' في العربية = || في البرمجة. لا يمكن أن يكون رقم < 10 و > 60 في نفس الوقت فلا تستخدم &&.",
+    explanation:"نستخدم || لأن الشرط: إما أقل من 10 أو أكبر من 60. 5 ينطبق الأول، 40 لا ينطبق → سعر عادي، 65 ينطبق الثاني.",
+    opts:[
+      {l:"A",t:"باستخدام && (مستحيل منطقياً)",c:`let ages = [5,40,65];\nfor (let i = 0; i < ages.length; i++) {\n  if ((ages[i] < 10) && (ages[i] > 60)) {\n    console.log("سيتم تطبيق خصم للأطفال أو كبار السن");\n  } else {\n    console.log("السعر العادي");\n  }\n}`,ok:false},
+      {l:"B",t:"باستخدام ||",c:`let ages = [5,40,65];\nfor (let i = 0; i < ages.length; i++) {\n  if ((ages[i] < 10) || (ages[i] > 60)) {\n    console.log("سيتم تطبيق خصم للأطفال أو كبار السن");\n  } else {\n    console.log("السعر العادي");\n  }\n}`,ok:true},
+      {l:"C",t:"ages بدون [i] — يقارن المصفوفة كلها",c:`let ages = [5,40,65];\nfor (let i = 0; i < ages.length; i++) {\n  if ((ages < 10) || (ages > 60)) {\n    console.log("سيتم تطبيق خصم للأطفال أو كبار السن");\n  } else {\n    console.log("السعر العادي");\n  }\n}`,ok:false},
+      {l:"D",t:"شروط >= و <= معكوسة",c:`let ages = [5,40,65];\nfor (let i = 0; i < ages.length; i++) {\n  if ((ages[i] <= 10) && (ages[i] >= 60)) {\n    console.log("سيتم تطبيق خصم للأطفال أو كبار السن");\n  } else {\n    console.log("السعر العادي");\n  }\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"التواريخ المقترحة لمباريات كرة القدم هي كالتالي\n5\n7",
+    code:null,
+    hint:"كلا الشرطين يجب أن يتحققا معاً = && (AND). تحقق من كل يوم: يوم 6 طقسه ممطر، يوم 6 يُستثنى.",
+    explanation:"يوم5: مشمس+22✓ | يوم6: ممطر✗ | يوم7: مشمس+25✓ | يوم8: مشمس+27✓ (يطبع أيضاً). نستخدم && لأن كلا الشرطين مطلوبان.",
+    opts:[
+      {l:"A",t:"&& مع weatherForecasts[i]",c:`let dates = ["5","6","7","8"];\nlet weatherForecasts = ["مشمس","ممطر","مشمس","مشمس"];\nlet participantsNumbers = [22,17,25,27];\nconsole.log("التواريخ المقترحة لمباريات كرة القدم هي كالتالي");\nfor (let i = 0; i < 4; i++) {\n  if ((weatherForecasts[i] == "مشمس") && (participantsNumbers[i] >= 22)) {\n    console.log(dates[i]);\n  }\n}`,ok:true},
+      {l:"B",t:"باستخدام || بدلاً من &&",c:`let dates = ["5","6","7","8"];\nlet weatherForecasts = ["مشمس","ممطر","مشمس","مشمس"];\nlet participantsNumbers = [22,17,25,27];\nconsole.log("التواريخ المقترحة هي كالتالي");\nfor (let i = 0; i < 4; i++) {\n  if ((weatherForecasts[i] == "مشمس") || (participantsNumbers[i] >= 22)) {\n    console.log(dates[i]);\n  }\n}`,ok:false},
+      {l:"C",t:"> 22 بدلاً من >= 22",c:`let dates = ["5","6","7","8"];\nlet weatherForecasts = ["مشمس","ممطر","مشمس","مشمس"];\nlet participantsNumbers = [22,17,25,27];\nconsole.log("التواريخ المقترحة لمباريات كرة القدم هي كالتالي");\nfor (let i = 0; i < 4; i++) {\n  if ((weatherForecasts[i] == "مشمس") && (participantsNumbers[i] > 22)) {\n    console.log(dates[i]);\n  }\n}`,ok:false},
+      {l:"D",t:"!= مشمس (عكس الشرط)",c:`let dates = ["5","6","7","8"];\nlet weatherForecasts = ["مشمس","ممطر","مشمس","مشمس"];\nlet participantsNumbers = [22,17,25,27];\nconsole.log("التواريخ المقترحة لمباريات كرة القدم هي كالتالي");\nfor (let i = 0; i < 4; i++) {\n  if ((weatherForecasts[i] != "مشمس") && (participantsNumbers[i] >= 22)) {\n    console.log(dates[i]);\n  }\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد الناتج",
+    q:"حدد النتيجة التي سيتم إخراجها عند تنفيذ هذا البرنامج",
+    code:`let foodList = ["سلطة","الدجاج المشوي","بارقيه"];\nconsole.log("سأطلب " + foodList[2]);`,
+    hint:"الفهرسة تبدأ من 0: أول عنصر [0]، ثاني [1]، ثالث [2].",
+    explanation:"سلطة[0]، الدجاج المشوي[1]، بارقيه[2]. إذن foodList[2] = 'بارقيه'.",
+    opts:[
+      {l:"A",t:"سأطلب الدجاج المشوي",c:null,ok:false},
+      {l:"B",t:"سأطلب بارقيه",c:null,ok:true},
+      {l:"C",t:"سأطلب سلطة",c:null,ok:false},
+      {l:"D",t:"خطأ: foodList[2] غير موجود",c:null,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"سأسافر في رحلة عمل إلى أمريكا في أبريل\nسأسافر في رحلة عمل إلى فرنسا في نوفمبر",
+    code:null,
+    hint:"'ما عدا كندا' = استخدم != 'كندا'. تأكد من تطابق ترتيب الشهور مع الوجهات.",
+    explanation:"نستثني كندا بـ !=. أمريكا[0]→أبريل[0]، فرنسا[1]→نوفمبر[1]. الترتيب في المصفوفتين مهم.",
+    opts:[
+      {l:"A",t:"== كندا (يطبع كندا فقط!)",c:`let businessTripDestinations = ["أمريكا","فرنسا","كندا"];\nlet months = ["أبريل","نوفمبر","مايو"];\nfor (let j = 0; j < businessTripDestinations.length; j++) {\n  if (businessTripDestinations[j] == "كندا") {\n    console.log("سأسافر في رحلة عمل إلى " + businessTripDestinations[j] + " في " + months[j]);\n  }\n}`,ok:false},
+      {l:"B",t:"!= كندا وترتيب صحيح",c:`let businessTripDestinations = ["أمريكا","فرنسا","كندا"];\nlet months = ["أبريل","نوفمبر","مايو"];\nfor (let j = 0; j < businessTripDestinations.length; j++) {\n  if (businessTripDestinations[j] != "كندا") {\n    console.log("سأسافر في رحلة عمل إلى " + businessTripDestinations[j] + " في " + months[j]);\n  }\n}`,ok:true},
+      {l:"C",t:"كندا في المنتصف — ترتيب شهور خاطئ",c:`let businessTripDestinations = ["أمريكا","كندا","فرنسا"];\nlet months = ["أبريل","مايو","نوفمبر"];\nfor (let j = 0; j < businessTripDestinations.length; j++) {\n  if (businessTripDestinations[j] != "كندا") {\n    console.log("سأسافر في رحلة عمل إلى " + businessTripDestinations[j] + " في " + months[j]);\n  }\n}`,ok:false},
+      {l:"D",t:"يطبع الكل بدون استثناء",c:`let businessTripDestinations = ["أمريكا","فرنسا","كندا"];\nlet months = ["أبريل","نوفمبر","مايو"];\nfor (let j = 0; j < businessTripDestinations.length; j++) {\n  console.log("سأسافر في رحلة عمل إلى " + businessTripDestinations[j] + " في " + months[j]);\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"موعد وصول كيتنا: 6:00 مساءً\nموعد وصول هاناكو: 6:00 مساءً\nموعد وصول ريويا: 6:30 مساءً\nموعد وصول آبا: 7:00 مساءً",
+    code:null,
+    hint:"كيتنا وهاناكو لهما نفس الوقت → نستخدم || (أحدهما يكفي). ترتيب المصفوفة يحدد ترتيب الطباعة.",
+    explanation:"نستخدم || لأن كيتنا وهاناكو كلاهما في 6:00. المصفوفة مرتبة: كيتنا[0]، هاناكو[1]، ريويا[2]، آبا[3].",
+    opts:[
+      {l:"A",t:"&& (مستحيل: اسم واحد لا يساوي اثنين)",c:`let visiters = ["آبا","هاناكو","ريويا","كيتنا"];\nlet arrivalTime = "";\nfor (let i = 0; i < 4; i++) {\n  if ((visiters[i] == "كيتنا") && (visiters[i] == "هاناكو")) {\n    arrivalTime = "6:00 مساءً";\n  } else if (visiters[i] == "ريويا") {\n    arrivalTime = "6:30 مساءً";\n  } else {\n    arrivalTime = "7:00 مساءً";\n  }\n  console.log("موعد وصول " + visiters[i] + ": " + arrivalTime);\n}`,ok:false},
+      {l:"B",t:"|| وترتيب صحيح",c:`let visiters = ["كيتنا","هاناكو","ريويا","آبا"];\nlet arrivalTime = "";\nfor (let i = 0; i < 4; i++) {\n  if ((visiters[i] == "كيتنا") || (visiters[i] == "هاناكو")) {\n    arrivalTime = "6:00 مساءً";\n  } else if (visiters[i] == "ريويا") {\n    arrivalTime = "6:30 مساءً";\n  } else {\n    arrivalTime = "7:00 مساءً";\n  }\n  console.log("موعد وصول " + visiters[i] + ": " + arrivalTime);\n}`,ok:true},
+      {l:"C",t:"ترتيب مصفوفة خاطئ",c:`let visiters = ["آبا","كيتنا","ريويا","هاناكو"];\nlet arrivalTime = "";\nfor (let i = 0; i < 4; i++) {\n  if ((visiters[i] == "كيتنا") || (visiters[i] == "هاناكو")) {\n    arrivalTime = "6:00 مساءً";\n  } else if (visiters[i] == "ريويا") {\n    arrivalTime = "6:30 مساءً";\n  } else {\n    arrivalTime = "7:00 مساءً";\n  }\n  console.log("موعد وصول " + visiters[i] + ": " + arrivalTime);\n}`,ok:false},
+      {l:"D",t:"أوقات معكوسة",c:`let visiters = ["كيتنا","هاناكو","ريويا","آبا"];\nlet arrivalTime = "";\nfor (let i = 0; i < 4; i++) {\n  if ((visiters[i] == "كيتنا") || (visiters[i] == "هاناكو")) {\n    arrivalTime = "7:00 مساءً";\n  } else if (visiters[i] == "ريويا") {\n    arrivalTime = "6:30 مساءً";\n  } else {\n    arrivalTime = "6:00 مساءً";\n  }\n  console.log("موعد وصول " + visiters[i] + ": " + arrivalTime);\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"هواياتي هي كرة القدم والطبخ",
+    code:null,
+    hint:"عد من الصفر: كرة القدم = [0]، الطبخ = [2]. تأكد من ترتيب المصفوفة الصحيح.",
+    explanation:"المصفوفة: كرة القدم[0]، المطالعة[1]، الطبخ[2]، السفر[3]. نستخدم activities[0] وactivities[2].",
+    opts:[
+      {l:"A",t:"activities[0] و [2] وترتيب صحيح",c:`let activities = ["كرة القدم","المطالعة","الطبخ","السفر"];\nconsole.log("هواياتي هي " + activities[0] + " و" + activities[2]);`,ok:true},
+      {l:"B",t:"مصفوفة بترتيب مختلف — النتيجة خاطئة",c:`let activities = ["السفر","الطبخ","المطالعة","كرة القدم"];\nconsole.log("هواياتي هي " + activities[0] + " و" + activities[2]);`,ok:false},
+      {l:"C",t:"[0] و [1] — يطبع المطالعة بدلاً من الطبخ",c:`let activities = ["كرة القدم","الطبخ","السفر","المطالعة"];\nconsole.log("هواياتي هي " + activities[0] + " و" + activities[1]);`,ok:false},
+      {l:"D",t:"مصفوفة خاطئة تماماً",c:`let activities = ["السفر","المطالعة","كرة القدم","الطبخ"];\nconsole.log("هواياتي هي " + activities[0] + " و" + activities[2]);`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"يتم لعب البيسبول في الملعب\nيتم لعب كرة السلة في الصالة الرياضية\nيتم لعب كرة القدم في الملعب\nيتم لعب الكرة الطائرة في الصالة الرياضية",
+    code:null,
+    hint:"مقارنة كل رياضة بالرياضات الخارجية باستخدام ||. إذا كانت في القائمة الخارجية → ملعب، وإلا → صالة.",
+    explanation:"نستخدم || للتحقق: هل الرياضة == outdoorSports[0] أو == outdoorSports[1]؟ if → ملعب، else → صالة.",
+    opts:[
+      {l:"A",t:"for مع || صحيح",c:`let sports = ["البيسبول","كرة السلة","كرة القدم","الكرة الطائرة"];\nlet outdoorSports = ["البيسبول","كرة القدم"];\nlet place = "الملعب";\nfor (let i = 0; i < 4; i++) {\n  if ((sports[i] == outdoorSports[0]) || (sports[i] == outdoorSports[1])) {\n    place = "الملعب";\n  } else {\n    place = "الصالة الرياضية";\n  }\n  console.log("يتم لعب " + sports[i] + " في " + place);\n}`,ok:true},
+      {l:"B",t:"if بدلاً من for (خطأ نحوي)",c:`let sports = ["البيسبول","كرة السلة","كرة القدم","الكرة الطائرة"];\nlet outdoorSports = ["البيسبول","كرة القدم"];\nlet place = "الملعب";\nif (let i = 0; i < 4; i++) {\n  if ((sports[i] == outdoorSports[0]) || (sports[i] == outdoorSports[1])) {\n    place = "الملعب";\n  } else { place = "الصالة الرياضية"; }\n  console.log("يتم لعب " + sports[i] + " في " + place);\n}`,ok:false},
+      {l:"C",t:"حلقة تنازلية من 3 إلى 0",c:`let sports = ["البيسبول","كرة السلة","كرة القدم","الكرة الطائرة"];\nlet outdoorSports = ["البيسبول","كرة القدم"];\nlet place = "الصالة";\nfor (let i = 3; i >= 0; i--) {\n  if ((sports[i] == outdoorSports[0]) || (sports[i] == outdoorSports[1])) {\n    place = "الملعب";\n  } else { place = "الصالة الرياضية"; }\n  console.log("يتم لعب " + sports[i] + " في " + place);\n}`,ok:false},
+      {l:"D",t:"&& بدلاً من || (مستحيل)",c:`let sports = ["البيسبول","كرة السلة","كرة القدم","الكرة الطائرة"];\nlet outdoorSports = ["البيسبول","كرة القدم"];\nlet place = "الملعب";\nfor (let i = 0; i < 4; i++) {\n  if ((sports[i] == outdoorSports[0]) && (sports[i] == outdoorSports[1])) {\n    place = "الملعب";\n  } else { place = "الصالة الرياضية"; }\n  console.log("يتم لعب " + sports[i] + " في " + place);\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"عندك وظيفة لغة يابانية\nليس عندك وظيفة رياضيات\nليس عندك وظيفة لغة إنجليزية\nعندك وظيفة علوم\nعندك وظيفة اجتماعيات",
+    code:null,
+    hint:"'ليس أ وليس ب' في البرمجة = (!=أ) && (!=ب). استخدام || هنا سيعطي نتيجة خاطئة دائماً.",
+    explanation:"المادة يجب ألا تكون رياضيات وألا تكون إنجليزية (كلا الشرطين معاً) = != مع &&.",
+    opts:[
+      {l:"A",t:"|| بدلاً من && — دائماً صحيح (خاطئ منطقياً)",c:`let subjects = ["لغة يابانية","رياضيات","لغة إنجليزية","علوم","اجتماعيات"];\nfor (let i = 0; i < 5; i++) {\n  if ((subjects[i] != "رياضيات") || (subjects[i] != "لغة إنجليزية")) {\n    console.log("عندك وظيفة " + subjects[i]);\n  } else {\n    console.log("ليس عندك وظيفة " + subjects[i]);\n  }\n}`,ok:false},
+      {l:"B",t:"!= مع &&",c:`let subjects = ["لغة يابانية","رياضيات","لغة إنجليزية","علوم","اجتماعيات"];\nfor (let i = 0; i < 5; i++) {\n  if ((subjects[i] != "رياضيات") && (subjects[i] != "لغة إنجليزية")) {\n    console.log("عندك وظيفة " + subjects[i]);\n  } else {\n    console.log("ليس عندك وظيفة " + subjects[i]);\n  }\n}`,ok:true},
+      {l:"C",t:"== مع && (دائماً خاطئ)",c:`let subjects = ["لغة يابانية","رياضيات","لغة إنجليزية","علوم","اجتماعيات"];\nfor (let i = 0; i < 5; i++) {\n  if ((subjects[i] == "رياضيات") && (subjects[i] == "لغة إنجليزية")) {\n    console.log("عندك وظيفة " + subjects[i]);\n  } else {\n    console.log("ليس عندك وظيفة " + subjects[i]);\n  }\n}`,ok:false},
+      {l:"D",t:"&& صحيح لكن حلقة حتى 3 فقط",c:`let subjects = ["لغة يابانية","رياضيات","لغة إنجليزية","علوم","اجتماعيات"];\nfor (let i = 0; i < 3; i++) {\n  if ((subjects[i] != "رياضيات") && (subjects[i] != "لغة إنجليزية")) {\n    console.log("عندك وظيفة " + subjects[i]);\n  } else {\n    console.log("ليس عندك وظيفة " + subjects[i]);\n  }\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد الناتج",
+    q:"حدد النتيجة التي سيتم إخراجها عند تنفيذ هذا البرنامج",
+    code:`let num = "3";\nfor (let i = 0; i < 3; i++) {\n  console.log("عرض قيمة ضرب " + num + " في 10");\n  num = num + "0";\n  console.log(num);\n}`,
+    hint:"تنبّه! num معرفة كـ string (بين علامتي تنصيص). عملية + مع string = دمج نصوص لا جمع أرقام.",
+    explanation:"num هو '3' (string). num+'0' = '30' (دمج). '30'+'0'='300'. '300'+'0'='3000'. في كل دورة يطبع الرسالة ثم القيمة.",
+    opts:[
+      {l:"A",t:"رسالة+30 / رسالة+300 / رسالة+3000",c:null,ok:true},
+      {l:"B",t:"30 / 300 / 3000 فقط (بدون رسائل)",c:null,ok:false},
+      {l:"C",t:"3 / 3 / 3 (القيمة لا تتغير)",c:null,ok:false},
+      {l:"D",t:"NaN — خطأ في التنفيذ",c:null,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"المكتبة مغلقة يوم الاثنين",
+    code:null,
+    hint:"نريد طباعة العنصر الأول فقط. i == 0 يعني: عندما نكون في أول تكرار للحلقة.",
+    explanation:"for من 0 إلى أقل من 5. if(i==0) يطبع الاثنين فقط. للحلقة التنازلية i=5; i<0 لن تعمل أبداً.",
+    opts:[
+      {l:"A",t:"for تنازلي i=5 → لن يعمل أبداً",c:`let weekdays = ["الاثنين","الأربعاء","الخميس","الجمعة","الثلاثاء"];\nfor (let i = 5; i < 0; i++) {\n  if (i == 0) {\n    console.log("المكتبة مغلقة يوم " + weekdays[i]);\n  }\n}`,ok:false},
+      {l:"B",t:"for 0→5 مع if(i==0)",c:`let weekdays = ["الاثنين","الأربعاء","الخميس","الجمعة","الثلاثاء"];\nfor (let i = 0; i < 5; i++) {\n  if (i == 0) {\n    console.log("المكتبة مغلقة يوم " + weekdays[i]);\n  }\n}`,ok:true},
+      {l:"C",t:"if مكان for (خطأ نحوي)",c:`let weekdays = ["الاثنين","الأربعاء","الخميس","الجمعة","الثلاثاء"];\nif (let i = 0; i < 5; i++) {\n  if (i == 0) {\n    console.log("المكتبة مغلقة يوم " + weekdays[i]);\n  }\n}`,ok:false},
+      {l:"D",t:"تنازلي مع i!==0 — يطبع الغلط",c:`let weekdays = ["الاثنين","الأربعاء","الخميس","الجمعة","الثلاثاء"];\nfor (let i = 5; i < 0; i++) {\n  if (i !== 0) {\n    console.log("المكتبة مغلقة يوم " + weekdays[i]);\n  }\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد الناتج",
+    q:"حدد النتيجة التي سيتم إخراجها عند تنفيذ هذا البرنامج",
+    code:`let totalPrice = 12000;\nlet purchaseNum = 10;\nlet time = 21;\n\nif (totalPrice > 15000 || purchaseNum >= 8) {\n  console.log("ستمنحك قسيمة");\n}\nif (!(time < 21)) {\n  console.log("سيتم تطبيق خصم 1000");\n  totalPrice = totalPrice - 1000;\n}\nconsole.log("المبلغ الإجمالي هو كالتالي");\nconsole.log(totalPrice);`,
+    hint:"قيّم كل شرط منفصلاً: شرط 1: || يكفي أحدهما. شرط 2: !(21<21) = !(false) = true.",
+    explanation:"شرط1: 12000>15000 خطأ، لكن 10>=8 صحيح → يطبع قسيمة. شرط2: !(21<21)=!(false)=true → خصم، totalPrice=11000. ثم يطبع 11000.",
+    opts:[
+      {l:"A",t:"قسيمة / خصم / المبلغ: 11000",c:null,ok:true},
+      {l:"B",t:"قسيمة / المبلغ: 12000 (بدون خصم)",c:null,ok:false},
+      {l:"C",t:"المبلغ: 12000 فقط",c:null,ok:false},
+      {l:"D",t:"لا شيء يُطبع",c:null,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"ريو نجح",
+    code:null,
+    hint:"! تعكس النتيجة: !false = true. جرّب تقييم الشرط الداخلي أولاً ثم طبّق !.",
+    explanation:"!((60<=60)&&(90<=60)) = !(true&&false) = !(false) = true → يطبع 'ريو نجح'. الطالب يفشل فقط إذا كلتا الدرجتين <= الحد.",
+    opts:[
+      {l:"A",t:"كلاهما <= بدون ! (لن يطبع شيئاً)",c:`let name = "ريو";\nlet scienceScore = 60;\nlet mathScore = 90;\nlet borderScore = 60;\n\nif ((scienceScore <= borderScore) && (mathScore <= borderScore)) {\n  console.log(name + " نجح");\n}`,ok:false},
+      {l:"B",t:"! مع && و <=",c:`let name = "ريو";\nlet scienceScore = 60;\nlet mathScore = 90;\nlet borderScore = 60;\n\nif (!((scienceScore <= borderScore) && (mathScore <= borderScore))) {\n  console.log(name + " نجح");\n}`,ok:true},
+      {l:"C",t:"كلاهما >= (غلط للمنطق)",c:`let name = "ريو";\nlet scienceScore = 60;\nlet mathScore = 90;\nlet borderScore = 60;\n\nif ((scienceScore >= borderScore) && (mathScore >= borderScore)) {\n  console.log(name + " نجح");\n}`,ok:false},
+      {l:"D",t:"كلاهما < (أقل من بدون يساوي)",c:`let name = "ريو";\nlet scienceScore = 60;\nlet mathScore = 90;\nlet borderScore = 60;\n\nif ((scienceScore < borderScore) && (mathScore < borderScore)) {\n  console.log(name + " نجح");\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"يمكن شراء التذاكر",
+    code:null,
+    hint:"!(possessionMoney < ticketPrice) تعني: ليس (المال أقل من السعر). جرّب: !(10000 < 8000) = ?",
+    explanation:"!(10000 < 8000) = !(false) = true → يمكن شراء التذاكر. ! تعكس الشرط من 'لا أستطيع' إلى 'أستطيع'.",
+    opts:[
+      {l:"A",t:"possessionMoney < ticketPrice (عكس المطلوب)",c:`let possessionMoney = 10000;\nlet ticketPrice = 8000;\n\nif (possessionMoney < ticketPrice) {\n  console.log("يمكن شراء التذاكر");\n}`,ok:false},
+      {l:"B",t:"!(possessionMoney < ticketPrice)",c:`let possessionMoney = 10000;\nlet ticketPrice = 8000;\n\nif (!(possessionMoney < ticketPrice)) {\n  console.log("يمكن شراء التذاكر");\n}`,ok:true},
+      {l:"C",t:"possessionMoney != ticketPrice (غير دقيق)",c:`let possessionMoney = 10000;\nlet ticketPrice = 8000;\n\nif (possessionMoney != ticketPrice) {\n  console.log("يمكن شراء التذاكر");\n}`,ok:false},
+      {l:"D",t:"possessionMoney > ticketPrice (صحيح منطقياً لكن خطأ في الصياغة المطلوبة)",c:`let possessionMoney = 10000;\nlet ticketPrice = 8000;\n\nif (possessionMoney > ticketPrice) {\n  console.log("يمكن شراء التذاكر");\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"هناك حصة رياضة اليوم\nستقام في الداخل",
+    code:null,
+    hint:"شرطان مستقلان: || للأيام (الجمعة أو الاثنين)، و != 'مشمس' للطقس (إذا لم يكن مشمساً → في الداخل).",
+    explanation:"'الجمعة' == 'الجمعة' → شرط || صحيح → حصة رياضة. 'ممطر' != 'مشمس' = true → ستقام في الداخل.",
+    opts:[
+      {l:"A",t:"|| + != مشمس",c:`let weekday = "الجمعة";\nlet weather = "ممطر";\nif ((weekday == "الاثنين") || (weekday == "الجمعة")) {\n  console.log("هناك حصة رياضة اليوم");\n}\nif (weather != "مشمس") {\n  console.log("ستقام في الداخل");\n}`,ok:true},
+      {l:"B",t:"&& (مستحيل: يوم لا يساوي اثنين)",c:`let weekday = "الجمعة";\nlet weather = "ممطر";\nif ((weekday == "الاثنين") && (weekday == "الجمعة")) {\n  console.log("هناك حصة رياضة اليوم");\n}\nif (weather == "مشمس") {\n  console.log("ستقام في الداخل");\n}`,ok:false},
+      {l:"C",t:"|| صحيح لكن == مشمس (عكس)",c:`let weekday = "الجمعة";\nlet weather = "ممطر";\nif ((weekday == "الاثنين") || (weekday == "الجمعة")) {\n  console.log("هناك حصة رياضة اليوم");\n}\nif (weather == "مشمس") {\n  console.log("ستقام في الداخل");\n}`,ok:false},
+      {l:"D",t:"&& + != مشمس — لن تُطبع الرياضة",c:`let weekday = "الجمعة";\nlet weather = "ممطر";\nif ((weekday == "الاثنين") && (weekday == "الجمعة")) {\n  console.log("هناك حصة رياضة اليوم");\n}\nif (weather != "مشمس") {\n  console.log("ستقام في الداخل");\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد الناتج",
+    q:"حدد النتيجة التي سيتم إخراجها عند تنفيذ هذا البرنامج",
+    code:`let weekday = "الثلاثاء";\n\nif ((weekday == "الثلاثاء") || (weekday == "الجمعة")) {\n  console.log("يوم القائمة الخاصة");\n} else {\n  console.log("يوم القائمة العادية");\n}`,
+    hint:"قارن قيمة weekday بكل شرط على حدة. يكفي شرط واحد صحيح مع ||.",
+    explanation:"'الثلاثاء' == 'الثلاثاء' = true. مع || يكفي هذا → يطبع 'يوم القائمة الخاصة'.",
+    opts:[
+      {l:"A",t:"يوم القائمة العادية",c:null,ok:false},
+      {l:"B",t:"يوم القائمة الخاصة",c:null,ok:true},
+      {l:"C",t:"لا شيء يُطبع",c:null,ok:false},
+      {l:"D",t:"خطأ في التنفيذ",c:null,ok:false}
+    ]
+  },
+  {
+    type:"تحديد الناتج",
+    q:"حدد النتيجة التي سيتم إخراجها عند تنفيذ هذا البرنامج",
+    code:`let weekday = "الخميس";\nlet currentTime = 8;\n\nif (weekday != "الخميس") {\n  console.log("اليوم ليس يوم تخفيضات");\n} else {\n  console.log("اليوم هو يوم تخفيضات");\n}\nif ((currentTime > 10) && (currentTime < 22)) {\n  console.log("مفتوح");\n} else {\n  console.log("سيفتح قريباً");\n}`,
+    hint:"تتبّع خطوة بخطوة: قيّم شرط if الأول (هل الخميس != الخميس؟)، ثم شرط if الثاني (هل 8 > 10؟).",
+    explanation:"'الخميس'!='الخميس' = false → else → 'اليوم هو يوم تخفيضات'. 8>10 = false → else → 'سيفتح قريباً'.",
+    opts:[
+      {l:"A",t:"اليوم ليس يوم تخفيضات / سيفتح قريباً",c:null,ok:false},
+      {l:"B",t:"اليوم ليس يوم تخفيضات / مفتوح",c:null,ok:false},
+      {l:"C",t:"اليوم هو يوم تخفيضات / سيفتح قريباً",c:null,ok:true},
+      {l:"D",t:"اليوم هو يوم تخفيضات / مفتوح",c:null,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"لا يمكنك ركوب اللعبة",
+    code:null,
+    hint:"130 >= 140 = false. مع &&، إذا كان أحد الشرطين false → النتيجة كلها false → نذهب للـ else.",
+    explanation:"height=130 < 140 → الشرط الأول false. && يحتاج كلاهما صحيح → if = false → else → 'لا يمكنك ركوب اللعبة'.",
+    opts:[
+      {l:"A",t:"&& ورسائل صحيحة",c:`let height = 130;\nlet weight = 50;\n\nif ((height >= 140) && (weight >= 40)) {\n  console.log("يمكنك ركوب اللعبة");\n} else {\n  console.log("لا يمكنك ركوب اللعبة");\n}`,ok:true},
+      {l:"B",t:"|| بدلاً من && — يطبع 'يمكنك' (خطأ)",c:`let height = 130;\nlet weight = 50;\n\nif ((height >= 140) || (weight >= 40)) {\n  console.log("يمكنك ركوب اللعبة");\n} else {\n  console.log("لا يمكنك ركوب اللعبة");\n}`,ok:false},
+      {l:"C",t:"&& لكن النصوص معكوسة",c:`let height = 130;\nlet weight = 50;\n\nif ((height >= 140) && (weight >= 40)) {\n  console.log("لا يمكنك ركوب اللعبة");\n} else {\n  console.log("يمكنك ركوب اللعبة");\n}`,ok:false},
+      {l:"D",t:"|| مع نصوص معكوسة",c:`let height = 130;\nlet weight = 50;\n\nif ((height >= 140) || (weight >= 40)) {\n  console.log("لا يمكنك ركوب اللعبة");\n} else {\n  console.log("يمكنك ركوب اللعبة");\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"الطقس اليوم مشمس\nلا حاجة إلى مظلة",
+    code:null,
+    hint:"نريد طباعة 'لا حاجة إلى مظلة' عندما الطقس ليس مطراً = != 'مطر'. لا تستخدم == 'مطر' أو != 'مشمس'.",
+    explanation:"weatherForecast='مشمس'. نطبع الطقس أولاً. ثم: 'مشمس' != 'مطر' = true → 'لا حاجة إلى مظلة'.",
+    opts:[
+      {l:"A",t:"!= مطر",c:`let weatherForecast = "مشمس";\nconsole.log("الطقس اليوم " + weatherForecast);\nif (weatherForecast != "مطر") {\n  console.log("لا حاجة إلى مظلة");\n}`,ok:true},
+      {l:"B",t:"== مطر (عكس المطلوب)",c:`let weatherForecast = "مشمس";\nconsole.log("الطقس اليوم " + weatherForecast);\nif (weatherForecast == "مطر") {\n  console.log("لا حاجة إلى مظلة");\n}`,ok:false},
+      {l:"C",t:"!= مشمس (يطبع عندما لا يكون مشمساً!)",c:`let weatherForecast = "مشمس";\nconsole.log("الطقس اليوم " + weatherForecast);\nif (weatherForecast != "مشمس") {\n  console.log("لا حاجة إلى مظلة");\n}`,ok:false},
+      {l:"D",t:"!= مطر لكن نص console.log الأولى ناقص",c:`let weatherForecast = "مشمس";\nconsole.log("الطقس " + weatherForecast);\nif (weatherForecast != "مطر") {\n  console.log("لا حاجة إلى مظلة");\n}`,ok:false}
+    ]
+  },
+  {
+    type:"تحديد الناتج",
+    q:"حدد النتيجة التي سيتم إخراجها عند تنفيذ هذا البرنامج",
+    code:`let favoriteFood = "الهامبرغر";\nlet lunchMenu = "السوشي";\n\nif (favoriteFood != lunchMenu) {\n  console.log("غداء اليوم هو " + lunchMenu);\n} else {\n  console.log("الذي أحبه " + " غداء اليوم هو " + favoriteFood);\n}`,
+    hint:"هل الهامبرغر يساوي السوشي؟ إذا كان != صحيحاً، ماذا يطبع؟",
+    explanation:"'الهامبرغر' != 'السوشي' = true → if → 'غداء اليوم هو السوشي'.",
+    opts:[
+      {l:"A",t:"غداء اليوم هو السوشي",c:null,ok:true},
+      {l:"B",t:"غداء اليوم هو الهامبرغر",c:null,ok:false},
+      {l:"C",t:"الذي أحبه غداء اليوم هو الهامبرغر",c:null,ok:false},
+      {l:"D",t:"لا شيء يُطبع",c:null,ok:false}
+    ]
+  },
+  {
+    type:"تحديد البرنامج",
+    q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
+    expected:"آخر يوم في يونيو هو 30",
+    code:null,
+    hint:"لدمج النصوص والمتغيرات نستخدم + فقط. * للضرب وليس للدمج.",
+    explanation:"console.log('آخر يوم في ' + month + ' هو ' + lastDay) يدمج النصوص والمتغيرات بالترتيب الصحيح.",
+    opts:[
+      {l:"A",t:"+ للدمج بترتيب صحيح",c:`let month = "يونيو";\nlet lastDay = "30";\nconsole.log("آخر يوم في " + month + " هو " + lastDay);`,ok:true},
+      {l:"B",t:"* بدلاً من + (خطأ)",c:`let month = "يونيو";\nlet lastDay = "30";\nconsole.log("آخر يوم في " * month * " هو " * lastDay);`,ok:false},
+      {l:"C",t:"متغيرات بترتيب معكوس",c:`let month = "يونيو";\nlet lastDay = "30";\nconsole.log("آخر يوم في " + lastDay + " هو " + month);`,ok:false},
+      {l:"D",t:"بدون علامة + (خطأ نحوي)",c:`let month = "يونيو";\nlet lastDay = "30";\nconsole.log("آخر يوم في " month " هو " lastDay);`,ok:false}
+    ]
+  }
+];
+
+/* ═══════════════════════════════════════════════
+   STATE  (backed by sessionStorage — survives F5)
+═══════════════════════════════════════════════ */
+const SK = 'tofas_state';   // sessionStorage key
+
+let CQ    = 0;
+let ANS   = new Array(QS.length).fill(null);
+let HINT  = new Array(QS.length).fill(false);
+let RVEAL = new Array(QS.length).fill(false);
+let SECS  = 40 * 60;
+let TID   = null;
+let T0    = null;
+let T1    = null;
+let FILTER = 'all';
+// which screen: 'intro' | 'exam' | 'review'
+let CURRENT_SCREEN = 'intro';
+
+/* ── persist / restore ── */
+function saveState(){
+  try{
+    sessionStorage.setItem(SK, JSON.stringify({
+      CQ,ANS,HINT,RVEAL,SECS,T0,T1,CURRENT_SCREEN
+    }));
+  }catch(e){}
+}
+
+function loadState(){
+  try{
+    const raw = sessionStorage.getItem(SK);
+    if(!raw) return false;
+    const s = JSON.parse(raw);
+    CQ   = s.CQ   ?? 0;
+    ANS  = s.ANS  ?? new Array(QS.length).fill(null);
+    HINT = s.HINT ?? new Array(QS.length).fill(false);
+    RVEAL= s.RVEAL?? new Array(QS.length).fill(false);
+    SECS = s.SECS ?? 40*60;
+    T0   = s.T0   ?? null;
+    T1   = s.T1   ?? null;
+    CURRENT_SCREEN = s.CURRENT_SCREEN ?? 'intro';
+    return true;
+  }catch(e){ return false; }
+}
+
+function clearState(){ try{ sessionStorage.removeItem(SK); }catch(e){} }
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+
+function show(id){
+  CURRENT_SCREEN = id.replace('S-','');
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('on'));
+  $(id).classList.add('on');
+  saveState();
+}
+function openOv(id){ $(id).classList.add('on'); }
+function closeOv(id){ $(id).classList.remove('on'); }
+
+/* ═══════════════════════════════════════════════
+   BOOT — on page load, check for saved state
+═══════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', ()=>{
+  const had = loadState();
+  if(!had || CURRENT_SCREEN === 'intro'){
+    show('S-intro');
+    return;
+  }
+  if(CURRENT_SCREEN === 'review'){
+    // exam was already finished
+    buildReview();
+    show('S-review');
+    return;
+  }
+  // Resume exam in progress
+  if(CURRENT_SCREEN === 'exam'){
+    show('S-exam');
+    buildDots();
+    render();
+    // restart timer from saved SECS
+    startTimer();
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   START EXAM
+═══════════════════════════════════════════════ */
+function startExam(){
+  clearState();
+  CQ=0; ANS=new Array(QS.length).fill(null);
+  HINT=new Array(QS.length).fill(false);
+  RVEAL=new Array(QS.length).fill(false);
+  SECS=40*60; T0=Date.now(); T1=null;
+  show('S-exam');
+  buildDots();
+  render();
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(TID);
+  TID = setInterval(()=>{
+    SECS--;
+    saveState();   // autosave every second
+    $('timer-txt').textContent = fmt(SECS);
+    const tb = $('timer-box');
+    if(SECS<=60)       tb.className='timer-box danger';
+    else if(SECS<=300) tb.className='timer-box warn';
+    else               tb.className='timer-box';
+    if(SECS<=0){ clearInterval(TID); T1=Date.now(); saveState(); openOv('ov-time'); }
+  },1000);
+  // set correct timer color immediately on resume
+  const tb=$('timer-box');
+  if(SECS<=60) tb.className='timer-box danger';
+  else if(SECS<=300) tb.className='timer-box warn';
+  $('timer-txt').textContent = fmt(SECS);
+}
+
+/* ═══════════════════════════════════════════════
+   DOTS
+═══════════════════════════════════════════════ */
+function buildDots(){
+  const rail = $('dots-rail'); rail.innerHTML='';
+  QS.forEach((_,i)=>{
+    const b = document.createElement('button');
+    b.className='qdot'; b.id='dot'+i; b.textContent=i+1;
+    b.onclick=()=>jump(i);
+    rail.appendChild(b);
+  });
+}
+function refreshDots(){
+  QS.forEach((_,i)=>{
+    const d = $('dot'+i); if(!d) return;
+    d.className='qdot';
+    if(i===CQ) d.classList.add('cur');
+    else if(ANS[i]!==null) d.classList.add('done');
+  });
+  const cur = $('dot'+CQ);
+  if(cur) cur.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER QUESTION
+═══════════════════════════════════════════════ */
+function render(){
+  const q = QS[CQ];
+  const N = QS.length;
+  const done = ANS.filter(a=>a!==null).length;
+
+  /* header */
+  const pct = (CQ+1)/N*100;
+  $('prog-fill').style.width = pct+'%';
+  $('hp-cur').textContent    = (CQ+1)+'/'+N;
+  $('hp-done').textContent   = done;
+  $('hp-left').textContent   = N-done;
+
+  /* card */
+  $('q-badge').textContent = CQ+1;
+  $('q-tag').textContent   = q.type;
+
+  // Build question HTML: main text + expected output box (like PDF)
+  let qHTML = `<div class="qtext">${q.q}</div>`;
+  if(q.expected){
+    qHTML += `<div class="q-expected-wrap">
+      <div class="q-expected-lbl">الناتج المتوقع:</div>
+      <div class="q-expected-box">${esc(q.expected)}</div>
+    </div>`;
+  }
+  $('q-text').innerHTML = qHTML;
+
+  /* code */
+  if(q.code){
+    $('q-code-box').style.display='block';
+    $('q-code-pre').textContent=q.code;
+  } else {
+    $('q-code-box').style.display='none';
+  }
+
+  /* options */
+  const container = $('q-opts');
+  container.innerHTML='';
+  q.opts.forEach((opt,oi)=>{
+    const btn = document.createElement('button');
+    btn.className='opt';
+    if(ANS[CQ]===oi) btn.classList.add('picked');
+    if(RVEAL[CQ]){
+      if(opt.ok) btn.classList.add('show-right');
+      else if(ANS[CQ]===oi && !opt.ok) btn.classList.add('show-wrong');
+    }
+    btn.onclick=()=>pick(oi);
+    const checkmark = (RVEAL[CQ] && opt.ok) ? ' <span class="correct-mark">&#10003;</span>' : '';
+    let h=`<div class="opt-lbl">${oi+1}${checkmark}</div>`;
+    h+=`<div class="opt-txt">${opt.t}</div>`;
+    if(opt.c) h+=`<div class="opt-code">${esc(opt.c)}</div>`;
+    btn.innerHTML=h;
+    container.appendChild(btn);
+  });
+
+  /* hint */
+  $('hint-box').className='info-box hint-style'+(HINT[CQ]&&!RVEAL[CQ]?' show':'');
+  $('hint-txt').textContent=q.hint;
+
+  /* reveal */
+  $('reveal-box').className='info-box reveal-style'+(RVEAL[CQ]?' show':'');
+  $('reveal-txt').textContent=RVEAL[CQ]?('الشرح: '+q.explanation):'';
+
+  /* footer */
+  $('btn-prev').disabled=(CQ===0);
+  const isLast=(CQ===N-1);
+  $('btn-next').style.display   = isLast?'none':'inline-flex';
+  $('btn-submit').style.display = isLast?'inline-flex':'none';
+
+  /* animate */
+  const card=$('qcard');
+  card.style.animation='none';
+  card.offsetHeight;
+  card.style.animation='slide-up .35s cubic-bezier(.4,0,.2,1)';
+
+  refreshDots();
+}
+
+/* ═══════════════════════════════════════════════
+   PICK OPTION
+═══════════════════════════════════════════════ */
+function pick(oi){
+  ANS[CQ]=oi;
+  /* update opts visually without full re-render */
+  const btns=[...$('q-opts').querySelectorAll('.opt')];
+  btns.forEach((b,i)=>{
+    b.classList.remove('picked','show-right','show-wrong');
+    if(i===oi) b.classList.add('picked');
+    if(RVEAL[CQ]){
+      if(QS[CQ].opts[i].ok) b.classList.add('show-right');
+      else if(i===oi && !QS[CQ].opts[i].ok) b.classList.add('show-wrong');
+    }
+  });
+  const done=ANS.filter(a=>a!==null).length;
+  $('hp-done').textContent=done;
+  $('hp-left').textContent=QS.length-done;
+  refreshDots();
+  saveState();
+}
+
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+function nav(dir){
+  const next=CQ+dir;
+  if(next<0||next>=QS.length) return;
+  CQ=next; saveState(); render();
+}
+function jump(idx){ CQ=idx; saveState(); render(); }
+
+/* ═══════════════════════════════════════════════
+   HINT & REVEAL
+═══════════════════════════════════════════════ */
+function toggleHint(){
+  if(RVEAL[CQ]) return;
+  HINT[CQ]=!HINT[CQ];
+  $('hint-box').className='info-box hint-style'+(HINT[CQ]?' show':'');
+  $('hint-txt').textContent=QS[CQ].hint;
+  saveState();
+}
+
+function doReveal(){
+  RVEAL[CQ]=true;
+  HINT[CQ]=false;
+  const btns=[...$('q-opts').querySelectorAll('.opt')];
+  btns.forEach((b,i)=>{
+    b.classList.remove('picked','show-right','show-wrong');
+    const opt=QS[CQ].opts[i];
+    if(opt.ok) b.classList.add('show-right');
+    else if(ANS[CQ]===i && !opt.ok) b.classList.add('show-wrong');
+    else if(ANS[CQ]===i) b.classList.add('picked');
+  });
+  $('hint-box').className='info-box hint-style';
+  $('reveal-box').className='info-box reveal-style show';
+  $('reveal-txt').textContent='الشرح: '+QS[CQ].explanation;
+  saveState();
+}
+
+/* ═══════════════════════════════════════════════
+   SUBMIT
+═══════════════════════════════════════════════ */
+function askSubmit(){
+  const unanswered=ANS.filter(a=>a===null).length;
+  $('ov-submit-title').textContent='تأكيد التسليم';
+  $('ov-submit-sub').innerHTML = unanswered>0
+    ? `لديك <strong style="color:var(--gold)">${unanswered}</strong> سؤال لم تجب عليه بعد.<br>هل تريد التسليم الآن؟`
+    : 'أجبت على جميع الأسئلة. هل تريد التسليم والانتقال للمراجعة؟';
+  openOv('ov-submit');
+}
+
+function finishExam(){
+  clearInterval(TID);
+  if(!T1) T1=Date.now();
+  CURRENT_SCREEN='review';
+  saveState();
+  document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('on'));
+  buildReview();
+  show('S-review');
+}
+
+/* ═══════════════════════════════════════════════
+   REVIEW
+═══════════════════════════════════════════════ */
+function buildReview(){
+  let ok=0,bad=0,skip=0;
+  QS.forEach((q,i)=>{
+    if(ANS[i]===null){ skip++; return; }
+    q.opts[ANS[i]].ok ? ok++ : bad++;
+  });
+  const pct=Math.round(ok/QS.length*100);
+
+  /* ring */
+  const circ=2*Math.PI*68; // 427.26
+  const offset=circ-(circ*pct/100);
+  setTimeout(()=>{
+    $('ring-fill').style.strokeDashoffset=offset;
+  },300);
+  $('ring-pct').textContent=pct+'%';
+
+  /* progress bar */
+  $('rev-prog-fill').style.width=pct+'%';
+
+  /* verdict */
+  let verdict,sub;
+  if(pct>=90){verdict='ممتاز! جاهز للامتحان الحقيقي 🏆';sub='أداء استثنائي — واصل!';}
+  else if(pct>=70){verdict='جيد جداً 🌟';sub='راجع الأخطاء وأعد المحاولة!';}
+  else if(pct>=60){verdict='اجتزت الحد الأدنى 📗';sub='تحتاج مزيداً من التدريب لتثبيت المفاهيم.';}
+  else{verdict='تحتاج مزيداً من المراجعة 📚';sub='ركّز على المصفوفات والشروط المنطقية.';}
+  $('score-verdict').textContent=verdict;
+  $('score-sub').textContent=sub;
+
+  /* summary */
+  $('rs-ok').textContent=ok;
+  $('rs-bad').textContent=bad;
+  $('rs-skip').textContent=skip;
+
+  /* time */
+  const elapsed=Math.round((T1-T0)/1000);
+  $('rev-time-lbl').textContent='الوقت المستغرق: '+fmt(elapsed);
+
+  renderList('all');
+}
+
+function setTab(f,btn){
+  FILTER=f;
+  document.querySelectorAll('.rtab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderList(f);
+}
+
+function renderList(filter){
+  const list=$('rq-list'); list.innerHTML='';
+  QS.forEach((q,i)=>{
+    const ans=ANS[i];
+    let status='skipped';
+    if(ans!==null) status=q.opts[ans].ok?'correct':'wrong';
+    if(filter!=='all'&&filter!==status) return;
+
+    const icons={correct:'✅',wrong:'❌',skipped:'⬜'};
+    const statusAr={correct:'إجابة صحيحة',wrong:'إجابة خاطئة',skipped:'لم يُجب'};
+    const cardCls={correct:'rc',wrong:'rw',skipped:'rs'};
+
+    const card=document.createElement('div');
+    card.className=`rqcard ${cardCls[status]}`;
+    card.id='rqc'+i;
+
+    const labels=['A','B','C','D'];
+    const optsHTML=q.opts.map((opt,oi)=>{
+      let cls='';
+      const isSel=(ans===oi);
+      if(opt.ok&&isSel) cls='sel-ok';
+      else if(!opt.ok&&isSel) cls='sel-bad';
+      else if(opt.ok) cls='is-right';
+      const icon=opt.ok?'✓':(isSel?'✗':'·');
+      return `<div class="rqopt ${cls}">
+        <span class="rqopt-icon">${icon}</span>
+        <div>
+          <div style="font-size:.65rem;color:var(--txt3);margin-bottom:2px">الخيار ${labels[oi]}</div>
+          <div style="font-size:.82rem">${opt.t}</div>
+          ${opt.c?`<div class="rq-code-pre" style="margin-top:5px">${esc(opt.c)}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+
+    card.innerHTML=`
+      <div class="rqcard-head" onclick="toggleRQ(${i})">
+        <div class="rq-icon">${icons[status]}</div>
+        <div class="rq-meta-wrap">
+          <div class="rq-num-tag">سؤال ${i+1} · ${q.type} · ${statusAr[status]}</div>
+          <div class="rq-q-short">${q.q}</div>
+        </div>
+        <div class="rq-chevron">▾</div>
+      </div>
+      <div class="rq-body">
+        ${q.code?`<div class="rq-code-pre">${esc(q.code)}</div>`:''}
+        <div class="rq-opts">${optsHTML}</div>
+        <div class="rq-expl">💡 ${q.explanation}</div>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  if(!list.children.length){
+    list.innerHTML='<div style="text-align:center;color:var(--txt3);padding:30px;font-size:.9rem">لا توجد أسئلة في هذا التصنيف</div>';
+  }
+}
+
+function toggleRQ(i){
+  const c=$('rqc'+i); if(!c) return;
+  c.classList.toggle('open');
+}
+
+/* ═══════════════════════════════════════════════
+   RESTART
+═══════════════════════════════════════════════ */
+function restartExam(){
+  clearInterval(TID);
+  clearState();
+  CQ=0;
+  ANS=new Array(QS.length).fill(null);
+  HINT=new Array(QS.length).fill(false);
+  RVEAL=new Array(QS.length).fill(false);
+  SECS=40*60;
+  T0=T1=null;
+  FILTER='all';
+  CURRENT_SCREEN='intro';
+  $('timer-txt').textContent='40:00';
+  $('timer-box').className='timer-box';
+  // reset review tabs
+  document.querySelectorAll('.rtab').forEach((b,i)=>{ b.classList.toggle('on',i===0); });
+  show('S-intro');
+}
+</script>
+
+<div id="copyright-bar">
+  <span class="cr-icon">©</span>
+  <span>جميع الحقوق محفوظة</span>
+  <span class="cr-dot">●</span>
+  <span class="cr-name">عبدالله محمد سعيد</span>
+  <span class="cr-dot">●</span>
+  <span>2026</span>
+</div>
+</body>
+</html>
