@@ -667,13 +667,14 @@ body::after{
     <div class="intro-kicker"><span></span> امتحان محاكي حقيقي</div>
     <h1 class="intro-h1">محاكاة لامتحان التوفاس نسخة تجريبية</h1>
     <h1 class="intro-h4">أولى ثانوى<br><em>جافاسكريبت</em></h4>
-    <p class="intro-sub">25 سؤالاً مستخرجاً من النماذج الرسمية — مع مؤقت، مساعدة، ومراجعة تفصيلية بعد الانتهاء</p>
+    <p class="intro-sub">اختر الامتحان الذي تريد البدء به: الاختبار الأول (25 سؤال) أو الاختبار الثاني (24 سؤال).</p>
 
-    <div class="intro-stats">
-      <div class="istat"><div class="istat-val">25</div><div class="istat-lbl">سؤال</div></div>
-      <div class="istat"><div class="istat-val">40</div><div class="istat-lbl">دقيقة</div></div>
-      <div class="istat"><div class="istat-val">60%</div><div class="istat-lbl">للنجاح</div></div>
-    </div>
+    <div class="intro-stats"> 
+  <div class="istat"><div class="istat-val">25</div><div class="istat-lbl">سؤال (الاختبار الأول)</div></div>
+  <div class="istat"><div class="istat-val">40</div><div class="istat-lbl">دقيقة (الاختبار الأول)</div></div>
+  <div class="istat"><div class="istat-val">24</div><div class="istat-lbl">سؤال (الاختبار الثاني)</div></div>
+  <div class="istat"><div class="istat-val">25</div><div class="istat-lbl">دقيقة (الاختبار الثاني)</div></div>
+</div>
 
     <div class="intro-rules">
       <div class="rules-head">📋 تعليمات الامتحان</div>
@@ -684,7 +685,10 @@ body::after{
       <div class="rule"><div class="rule-dot"></div><span>الوقت المتاح 40 دقيقة — ينتهي الامتحان تلقائياً عند انتهاء الوقت</span></div>
     </div>
 
-    <button class="cta-btn" onclick="startExam()">ابدأ الامتحان ←</button>
+    <div class="cta-row" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+  <button class="cta-btn" onclick="startExam('exam1')">ابدأ الاختبار الأول ←</button>
+  <button class="cta-btn" onclick="startExam('exam2')" style="background:var(--teal);box-shadow:0 8px 30px rgba(0,229,200,.25)">ابدأ الاختبار الثاني ←</button>
+</div>
   </div>
 </section>
 
@@ -695,7 +699,7 @@ body::after{
 
   <div id="exam-hdr">
     <div class="hdr-top">
-      <div class="hdr-logo"><div class="hdr-logo-dot"></div>نسخة تجريبية لمحاكاة امتحان التوفاس - اولى ثانوى</div>
+      <div class="hdr-logo"><div class="hdr-logo-dot"></div><span id="examTitleHdr">نسخة تجريبية لمحاكاة امتحان التوفاس - الاختبار الأول</span></div>
 
       <div class="timer-box" id="timer-box">
         <span>⏱</span>
@@ -858,7 +862,7 @@ body::after{
 /* ═══════════════════════════════════════════════
    QUESTIONS DATA
 ═══════════════════════════════════════════════ */
-const QS = [
+const QS_EXAM1 = [
   {
     type:"تحديد البرنامج",
     q:"حدد البرنامج الذي يقوم بإخراج ما يلي",
@@ -1205,6 +1209,846 @@ const QS = [
   }
 ];
 
+const QS_EXAM2 = [
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "اعرض الملابس التي يتم ارتداؤها (سترة، بنطال، جوارب).",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 4.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let clothesItems = [\"قبعة\", \"سترة\", \"بنطال\", \"جوارب\"];\nconsole.log(\"اعرض الملابس التي يتم ارتداؤها\");\nfor (let i = 0; i < clothesItems; i++) {\n  if (!(clothesItems[i] == \"قبعة\")) {\n    console.log(clothesItems[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let clothesItems = [\"قبعة\", \"سترة\", \"بنطال\", \"جوارب\"];\nconsole.log(\"اعرض الملابس التي يتم ارتداؤها\");\nfor (let i = 0; i < clothesItems; i++) {\n  if (clothesItems[i] == \"قبعة\") {\n    console.log(clothesItems[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let clothesItems = [\"قبعة\", \"سترة\", \"بنطال\", \"جوارب\"];\nconsole.log(\"اعرض الملابس التي يتم ارتداؤها\");\nfor (let i = 0; i < clothesItems.length; i++) {\n  if (clothesItems[i] == \"قبعة\") {\n    console.log(clothesItems[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let clothesItems = [\"قبعة\", \"سترة\", \"بنطال\", \"جوارب\"];\nconsole.log(\"اعرض الملابس التي يتم ارتداؤها\");\nfor (let i = 0; i < clothesItems.length; i++) {\n  if (!(clothesItems[i] == \"قبعة\")) {\n    console.log(clothesItems[i]);\n  }\n}",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "يمكنك دخول المتجر.",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 1.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let guests = [\"يومي\", \"تاكويا\"];\nlet reservationStatus = \"لا يوجد حجز\";\nif ((guests.length <= 2) || (reservationStatus == \"محجوز\")) {\n  console.log(\"يمكنك دخول المتجر\");\n}",
+        "ok": true
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let guests = [\"يومي\", \"تاكويا\"];\nlet reservationStatus = \"لا يوجد حجز\";\nif ((guests <= 2) || (reservationStatus == \"محجوز\")) {\n  console.log(\"يمكنك دخول المتجر\");\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let guests = [\"يومي\", \"تاكويا\"];\nlet reservationStatus = \"لا يوجد حجز\";\nif ((guests.length <= 2) && (reservationStatus == \"محجوز\")) {\n  console.log(\"يمكنك دخول المتجر\");\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let guests = [\"يومي\", \"تاكويا\"];\nlet reservationStatus = \"لا يوجد حجز\";\nif ((guests <= 2) && (reservationStatus == \"محجوز\")) {\n  console.log(\"يمكنك دخول المتجر\");\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "سنقوم بتنفيذ المهمة.",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let statusList = [\"متوفر في المخزون\", \"تم طلبه\", \"قيد الانتظار\"];\nif ((statusList >= 3) && (statusList == \"متوفر في المخزون\")) {\n  console.log(\"سنقوم بتنفيذ المهمة\");\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let statusList = [\"متوفر في المخزون\", \"تم طلبه\", \"قيد الانتظار\"];\nif ((statusList >= 3) || (statusList == \"متوفر في المخزون\")) {\n  console.log(\"سنقوم بتنفيذ المهمة\");\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let statusList = [\"متوفر في المخزون\", \"تم طلبه\", \"قيد الانتظار\"];\nif ((statusList.length >= 3) && (statusList == \"متوفر في المخزون\")) {\n  console.log(\"سنقوم بتنفيذ المهمة\");\n}",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let statusList = [\"متوفر في المخزون\", \"تم طلبه\", \"قيد الانتظار\"];\nif ((statusList.length >= 3) || (statusList == \"متوفر في المخزون\")) {\n  console.log(\"سنقوم بتنفيذ المهمة\");\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج النوع المفضل من الكتب (رواية، كتاب أعمال، كتاب أطفال).",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 1.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let bookGenres = [\"رواية\", \"كتاب أعمال\", \"كتاب أطفال\"];\nfor (let i = 0; i < bookGenres.length; i++) {\n  console.log(\"النوع المفضل من الكتب: \" + bookGenres[i]);\n}",
+        "ok": true
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let bookGenres = [\"رواية\", \"كتاب أعمال\", \"كتاب أطفال\"];\nfor (let i = 0; i < bookGenres.length; i++) {\n  console.log(\"النوع المفضل من الكتب: \" + bookGenres[i[i]]);\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let bookGenres = [\"رواية\", \"كتاب أعمال\", \"كتاب أطفال\"];\nfor (let i = 0; i < bookGenres; i++) {\n  console.log(\"النوع المفضل من الكتب: \" + bookGenres[i]);\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let bookGenres = [\"رواية\", \"كتاب أعمال\", \"كتاب أطفال\"];\nfor (let i = 0; i < bookGenres; i++) {\n  console.log(\"النوع المفضل من الكتب: \" + bookGenres[i[i]]);\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج:",
+    "expected": "درجات الحرارة العظمى خلال الأيام 3 الماضية كما يلي 40.",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 2.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let temperatureList = [6];\nlet maxTemperature = 0;\nfor (let i = 0; i < 3; i++) {\n  if (maxTemperature < temperatureList) {\n    maxTemperature = temperatureList;\n  }\n}\nconsole.log(\"درجات الحرارة العظمى خلال الأيام 3 الماضية كما يلي\");\nconsole.log(maxTemperature);",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let temperatureList = [6];\nlet maxTemperature = 0;\nfor (let i = 0; i < 3; i++) {\n  if (maxTemperature < temperatureList[i]) {\n    maxTemperature = temperatureList[i];\n  }\n}\nconsole.log(\"درجات الحرارة العظمى خلال الأيام 3 الماضية كما يلي\");\nconsole.log(maxTemperature);",
+        "ok": true
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let temperatureList = [6], , ;\nlet maxTemperature = 0;\nfor (let i = 0; i < 3; i++) {\n  if (maxTemperature < temperatureList[i]) {\n    maxTemperature = temperatureList[i];\n  }\n}\nconsole.log(\"درجات الحرارة العظمى خلال الأيام 3 الماضية كما يلي\");\nconsole.log(maxTemperature);",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let temperatureList = [6], , ;\nlet maxTemperature = 0;\nfor (let i = 0; i < 3; i++) {\n  if (maxTemperature < temperatureList) {\n    maxTemperature = temperatureList;\n  }\n}\nconsole.log(\"درجات الحرارة العظمى خلال الأيام 3 الماضية كما يلي\");\nconsole.log(maxTemperature);",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "سأشتري حليباً سأشتري خبزاً سأشتري بيضاً",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let shoppingList = [\"حليباً\", \"خبزاً\", \"بيضاً\"];\nfor (i < 3) {\n  console.log(\"سأشتري \" + shoppingList[i]);\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let shoppingList = [\"حليباً\", \"خبزاً\", \"بيضاً\"];\nfor (i < 3) {\n  console.log(\"سأشتري \" + shoppingList);\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let shoppingList = [\"حليباً\", \"خبزاً\", \"بيضاً\"];\nfor (let i = 0; i < 3; i++) {\n  console.log(\"سأشتري \" + shoppingList[i]);\n}",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let shoppingList = [\"حليباً\", \"خبزاً\", \"بيضاً\"];\nfor (let i = 0; i < 3; i++) {\n  console.log(\"سأشتري \" + shoppingList);\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "جدول اليوم: طبيب الأسنان.",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let todaySchedules = [\"طبيب الأسنان\", \"اجتماع\"];\nlet rescheduledItem = \"اجتماع\";\nfor (let i = 0; i < 2; i++) {\n  if (!(todaySchedules == rescheduledItem)) {\n    console.log(\"جدول اليوم: \" + todaySchedules);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let todaySchedules = [\"طبيب الأسنان\", \"اجتماع\"];\nlet rescheduledItem = \"اجتماع\";\nfor (let i = 0; i < 2; i++) {\n  if (todaySchedules[i] == rescheduledItem) {\n    console.log(\"جدول اليوم: \" + todaySchedules[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let todaySchedules = [\"طبيب الأسنان\", \"اجتماع\"];\nlet rescheduledItem = \"اجتماع\";\nfor (let i = 0; i < 2; i++) {\n  if (!(todaySchedules[i] == rescheduledItem)) {\n    console.log(\"جدول اليوم: \" + todaySchedules[i]);\n  }\n}",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let todaySchedules = [\"طبيب الأسنان\", \"اجتماع\"];\nlet rescheduledItem = \"اجتماع\";\nfor (let i = 0; i < 2; i++) {\n  if (todaySchedules == rescheduledItem) {\n    console.log(\"جدول اليوم: \" + todaySchedules);\n  }\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "الكتاب C مُستعار حالياً.",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let bookList = [\"A\", \"B\", \"C\", \"D\"];\nlet checkedOutBooks = [\"C\", \"E\"];\nfor (let i = 0; i < bookList.length; i++) {\n  if ((bookList[i] == checkedOutBooks) && (bookList[i] == checkedOutBooks[3])) {\n    console.log(\"الكتاب \" + bookList[i] + \" مُستعار حالياً\");\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let bookList = [\"A\", \"B\", \"C\", \"D\"];\nlet checkedOutBooks = [\"C\", \"E\"];\nfor (let i = 0; i < bookList.length; i++) {\n  if ((bookList == checkedOutBooks[3]) && (bookList[3] == checkedOutBooks[3])) {\n    console.log(\"الكتاب \" + bookList[i] + \" مُستعار حالياً\");\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let bookList = [\"A\", \"B\", \"C\", \"D\"];\nlet checkedOutBooks = [\"C\", \"E\"];\nfor (let i = 0; i < bookList.length; i++) {\n  if ((bookList[i] == checkedOutBooks) || (bookList[i] == checkedOutBooks[3])) {\n    console.log(\"الكتاب \" + bookList[i] + \" مُستعار حالياً\");\n  }\n}",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let bookList = [\"A\", \"B\", \"C\", \"D\"];\nlet checkedOutBooks = [\"C\", \"E\"];\nfor (let i = 0; i < bookList.length; i++) {\n  if ((bookList == checkedOutBooks) || (bookList[3] == checkedOutBooks[3])) {\n    console.log(\"الكتاب \" + bookList[i] + \" مُستعار حالياً\");\n  }\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "ريسا حاضرة ميكا حاضرة",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 4.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let students = [\"ريسا\", \"ميكا\", \"مي\"];\nlet absentStudent = \"مي\";\nfor (let i = 0; i < 3; i++) {\n  if (students != absentStudent) {\n    console.log(students + \" حاضرة\");\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let students = [\"ريسا\", \"ميكا\", \"مي\"];\nlet absentStudent = \"مي\";\nfor (let i = 0; i < 3; i++) {\n  if (students == absentStudent) {\n    console.log(students + \" حاضرة\");\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let students = [\"ريسا\", \"ميكا\", \"مي\"];\nlet absentStudent = \"مي\";\nfor (let i = 0; i < 3; i++) {\n  if (students[i] == absentStudent) {\n    console.log(students[i] + \" حاضرة\");\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let students = [\"ريسا\", \"ميكا\", \"مي\"];\nlet absentStudent = \"مي\";\nfor (let i = 0; i < 3; i++) {\n  if (students[i] != absentStudent) {\n    console.log(students[i] + \" حاضرة\");\n  }\n}",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "المواد التي سيتم دراستها اليوم كما يلي علوم رياضيات اللغة الإنجليزية",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 2.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let studySubjects = [\"علوم\", \"رياضيات\", \"اللغة الإنجليزية\"];\nfor (let i = 0; i < 3; i++) {\n  console.log(studySubjects[i]);\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let studySubjects = [\"علوم\", \"رياضيات\", \"اللغة الإنجليزية\"];\nconsole.log(\"المواد التي سيتم دراستها اليوم كما يلي\");\nfor (let i = 0; i < 3; i++) {\n  console.log(studySubjects[i]);\n}",
+        "ok": true
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let studySubjects = [\"علوم\", \"رياضيات\", \"اللغة الإنجليزية\"];\nconsole.log(\"المواد التي سيتم دراستها اليوم كما يلي\");\nelse (let i = 0; i < 3; i++) {\n  console.log(studySubjects[i]);\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let studySubjects = [\"علوم\", \"رياضيات\", \"اللغة الإنجليزية\"];\nconsole.log(\"المواد التي سيتم دراستها اليوم كما يلي\");\nelse (let i = 0; i < 3; i++) {\n  console.log(studySubjects);\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "اعرض سعة زجاجة الماء 300",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 2.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let volumes = ;\nfor (let i = 0; i < volumes.length; i++) {\n  if (volumes[i] == 0) {\n    console.log(\"اعرض سعة زجاجة الماء\");\n    console.log(volumes[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let volumes = ;\nfor (let i = 0; i < volumes.length; i++) {\n  if (!(volumes[i] == 0)) {\n    console.log(\"اعرض سعة زجاجة الماء\");\n    console.log(volumes[i]);\n  }\n}",
+        "ok": true
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let volumes = ;\nfor (let i = 0; i < volumes.length; i++) {\n  if (volumes[i] == 0) {\n    console.log(\"اعرض سعة زجاجة الماء\");\n    console.log(volumes);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let volumes = ;\nfor (let i = 0; i < volumes.length; i++) {\n  if (!(volumes[i] == 0)) {\n    console.log(\"اعرض سعة زجاجة الماء\");\n    console.log(volumes);\n  }\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "تم اكتشاف درجة غير صالحة عدد مرات تحقيق درجة عالية كما يلي 2",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let playerScores = ;\nlet highScoreCount = 0;\nlet lowerLimitHighScore = 800;\nlet upperLimitHighScore = 1000;\nfor (let i = 0; i < 5; i++) {\n  if (playerScores[i] >= lowerLimitHighScore || playerScores[i] <= upperLimitHighScore) {\n    highScoreCount = highScoreCount + 1;\n  } else if (playerScores[i] > upperLimitHighScore) {\n    console.log(\"تم اكتشاف درجة غير صالحة\");\n  }\n}\nconsole.log(\"عدد مرات تحقيق درجة عالية كما يلي\");\nconsole.log(highScoreCount);",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let playerScores = ;\nlet highScoreCount = 0;\nlet lowerLimitHighScore = 800;\nlet upperLimitHighScore = 1000;\nfor (let i = 0; i < 5; i++) {\n  if (playerScores[i] >= lowerLimitHighScore && playerScores[i] <= upperLimitHighScore) {\n    highScoreCount = highScoreCount + 1;\n  } else if (playerScores[i] > upperLimitHighScore) {\n    console.log(\"تم اكتشاف درجة غير صالحة\");\n  }\n}\nconsole.log(\"عدد مرات تحقيق درجة عالية كما يلي\");\nconsole.log(playerScores);",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let playerScores = ;\nlet highScoreCount = 0;\nlet lowerLimitHighScore = 800;\nlet upperLimitHighScore = 1000;\nfor (let i = 0; i < 5; i++) {\n  if (playerScores[i] >= lowerLimitHighScore && playerScores[i] <= upperLimitHighScore) {\n    highScoreCount = highScoreCount + 1;\n  } else if (playerScores[i] > upperLimitHighScore) {\n    console.log(\"تم اكتشاف درجة غير صالحة\");\n  }\n}\nconsole.log(\"عدد مرات تحقيق درجة عالية كما يلي\");\nconsole.log(highScoreCount);",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let playerScores = ;\nlet highScoreCount = 0;\nlet lowerLimitHighScore = 800;\nlet upperLimitHighScore = 1000;\nfor (let i = 0; i < 5; i++) {\n  if (playerScores[i] >= lowerLimitHighScore || playerScores[i] <= upperLimitHighScore) {\n    highScoreCount = highScoreCount + 1;\n  } else if (playerScores[i] > upperLimitHighScore) {\n    console.log(\"تم اكتشاف درجة غير صالحة\");\n  }\n}\nconsole.log(\"عدد مرات تحقيق درجة عالية كما يلي\");\nconsole.log(playerScores);",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "المستخدمون المسموح لهم بالدخول كما يلي userA userB userD",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 1.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let userList = [\"userA\", \"userB\", \"userC\", \"userD\"];\nlet deniedUser = \"userC\";\nconsole.log(\"المستخدمون المسموح لهم بالدخول كما يلي\");\nfor (let i = 0; i < 4; i++) {\n  if (userList[i] != deniedUser) {\n    console.log(userList[i]);\n  }\n}",
+        "ok": true
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let userList = [\"userA\", \"userB\", \"userC\", \"userD\"];\nlet deniedUser = \"userC\";\nconsole.log(\"المستخدمون المسموح لهم بالدخول كما يلي\");\nfor (let i = 0; i < 4; i++) {\n  if (userList[i] == deniedUser) {\n    console.log(userList[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let userList = [\"userA\", \"userB\", \"userC\", \"userD\"];\nlet deniedUser = \"userC\";\nconsole.log(\"المستخدمون المسموح لهم بالدخول كما يلي\");\nfor (let i = 0; i < 4; i++) {\n  if (userList == deniedUser) {\n    console.log(userList);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let userList = [\"userA\", \"userB\", \"userC\", \"userD\"];\nlet deniedUser = \"userC\";\nconsole.log(\"المستخدمون المسموح لهم بالدخول كما يلي\");\nfor (let i = 0; i < 4; i++) {\n  if (userList != deniedUser) {\n    console.log(userList);\n  }\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يقوم بإخراج ما يلي:",
+    "expected": "طماطم غير متوفرة المكونات المتوفرة في المتجر كما يلي ملفوف بروكلي كرفس",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 1.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let ingredients = [\"طماطم\", \"ملفوف\", \"بروكلي\", \"كرفس\"];\nlet soldOutIngredient = \"طماطم\";\nconsole.log(soldOutIngredient + \" غير متوفرة\");\nconsole.log(\"المكونات المتوفرة في المتجر كما يلي\");\nfor (let i = 0; i < 4; i++) {\n  if (!(ingredients[i] == soldOutIngredient)) {\n    console.log(ingredients[i]);\n  }\n}",
+        "ok": true
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let ingredients = [\"طماطم\", \"ملفوف\", \"بروكلي\", \"كرفس\"];\nlet soldOutIngredient = \"طماطم\";\nconsole.log(soldOutIngredient + \" غير متوفرة\");\nconsole.log(\"المكونات المتوفرة في المتجر كما يلي\");\nfor (let i = 0; i < 4; i++) {\n  if (ingredients[i] == soldOutIngredient) {\n    console.log(ingredients[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let ingredients = [\"طماطم\", \"ملفوف\", \"بروكلي\", \"كرفس\"];\nlet soldOutIngredient = \"طماطم\";\nconsole.log(soldOutIngredient + \" غير متوفرة\");\nconsole.log(\"المكونات المتوفرة في المتجر كما يلي\");\nfor (let i = 0; i < 4; i++) {\n  if (ingredients[i] == soldOutIngredient) {\n    console.log(ingredients);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let ingredients = [\"طماطم\", \"ملفوف\", \"بروكلي\", \"كرفس\"];\nlet soldOutIngredient = \"طماطم\";\nconsole.log(soldOutIngredient + \" غير متوفرة\");\nconsole.log(\"المكونات المتوفرة في المتجر كما يلي\");\nfor (let i = 0; i < 4; i++) {\n  if (!(ingredients[i] == soldOutIngredient)) {\n    console.log(ingredients);\n  }\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: استلمت ملفوف تخطي تخطي استلمت جزر",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let pipelineFoodItems = [\"ملفوف\", \"البصل\", \"طماطم\", \"جزر\"];\nlet nonVegetable = \"البصل\";\nlet enoughFood = \"طماطم\";\nfor (let i = 0; i < pipelineFoodItems.length; i++) {\n  if ((pipelineFoodItems[i] == nonVegetable) || (pipelineFoodItems[i] == enoughFood)) {\n    console.log(\"تخطي\");\n  } else {\n    console.log(\"استلمت \" + pipelineFoodItems[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let pipelineFoodItems = [\"ملفوف\", \"البصل\", \"طماطم\", \"جزر\"];\nlet nonVegetable = \"البصل\";\nlet enoughFood = \"طماطم\";\nfor (let i = 0; i < pipelineFoodItems.length; i++) {\n  if ((pipelineFoodItems[i] == nonVegetable) && (pipelineFoodItems[i] == enoughFood)) {\n    console.log(\"تخطي\");\n  } else {\n    console.log(\"استلمت \" + pipelineFoodItems[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let pipelineFoodItems = [\"ملفوف\", \"البصل\", \"طماطم\", \"جزر\"];\nlet nonVegetable = \"البصل\";\nlet enoughFood = \"طماطم\";\nfor (let i = 0; i < pipelineFoodItems.length; i++) {\n  if ((pipelineFoodItems[i] == nonVegetable) || (pipelineFoodItems[i] == enoughFood)) {\n    console.log(\"تخطي\");\n  } else {\n    console.log(\"استلمت \" + pipelineFoodItems[i]);\n  }\n}",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let pipelineFoodItems = [\"ملفوف\", \"البصل\", \"طماطم\", \"جزر\"];\nlet nonVegetable = \"البصل\";\nlet enoughFood = \"طماطم\";\nfor (let i = 0; i < pipelineFoodItems.length; i++) {\n  if ((pipelineFoodItems[i] == nonVegetable) && (pipelineFoodItems[i] == enoughFood)) {\n    console.log(\"تخطي\");\n  } else {\n    console.log(\"استلمت \" + pipelineFoodItems);\n  }\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج:",
+    "expected": "مواقف الحافلات كما يلي أمام المحطة أمام مبنى البلدية مستودع الحافلات",
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let busStopList = [\"أمام المحطة\", \"أمام مبنى البلدية\", \"مستودع الحافلات\"];\nlet suspendedBusStop = \"أمام موقع الفعالية\";\nconsole.log(\"مواقف الحافلات كما يلي\");\nfor (let i = 0; i < busStopList.length; i++) {\n  if (busStopList[i] == suspendedBusStop) {\n    console.log(busStopList[i]);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let busStopList = [\"أمام المحطة\", \"أمام مبنى البلدية\", \"مستودع الحافلات\"];\nlet suspendedBusStop = \"أمام موقع الفعالية\";\nconsole.log(\"مواقف الحافلات كما يلي\");\nfor (let i = 0; i < busStopList.length; i++) {\n  if (busStopList[i] == suspendedBusStop) {\n    console.log(busStopList);\n  }\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let busStopList = [\"أمام المحطة\", \"أمام مبنى البلدية\", \"مستودع الحافلات\"];\nlet suspendedBusStop = \"أمام موقع الفعالية\";\nconsole.log(\"مواقف الحافلات كما يلي\");\nfor (let i = 0; i < busStopList.length; i++) {\n  if (busStopList[i] != suspendedBusStop) {\n    console.log(busStopList[i]);\n  }\n}",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let busStopList = [\"أمام المحطة\", \"أمام مبنى البلدية\", \"مستودع الحافلات\"];\nlet suspendedBusStop = \"أمام موقع الفعالية\";\nconsole.log(\"مواقف الحافلات كما يلي\");\nfor (let i = 0; i < busStopList.length; i++) {\n  if (busStopList[i] != suspendedBusStop) {\n    console.log(busStopList);\n  }\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: كرة قدم الصالات سيتم تنفيذها أنشطة تطوعية سيتم تنفيذها وجبة سيتم تنفيذها",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let activityList = [\"كرة قدم الصالات\", \"أنشطة تطوعية\", \"وجبة\"];\nfor (let i = 0; i < activityList.length; i++) {\n  console.log(activityList[i] + \" سيتم تنفيذها\");\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let activityList = [\"كرة قدم الصالات\", \"أنشطة تطوعية\", \"وجبة\"];\nif (let i = 0; i < activityList.length; i++) {\n  console.log(activityList[i] + \" سيتم تنفيذها\");\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let activityList = [\"كرة قدم الصالات\", \"أنشطة تطوعية\", \"وجبة\"];\nfor (let i = 0; i < activityList.length; i++) {\n  console.log(activityList[i] + \" سيتم تنفيذها\");\n}",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let activityList = [\"كرة قدم الصالات\", \"أنشطة تطوعية\", \"وجبة\"];\nfor (let i = 0; i < activityList.length; i++) {\n  console.log(activityList + \" سيتم تنفيذها\");\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: سيتم إرشادك إلى الغرفة الكبيرة اليوم يوجد خصم على المشروبات",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let guestCount = 14;\nlet visitDay = \"يوم عمل\";\nif ((guestCount >= 8) || (guestCount <= 16)) {\n  console.log(\"سيتم إرشادك إلى الغرفة الكبيرة\");\n}\nif (!(visitDay == \"عطلة\")) {\n  console.log(\"اليوم يوجد خصم على المشروبات\");\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let guestCount = 14;\nlet visitDay = \"يوم عمل\";\nif ((guestCount >= 8) || (guestCount <= 16)) {\n  console.log(\"سيتم إرشادك إلى الغرفة الكبيرة\");\n}\nif (visitDay == \"عطلة\") {\n  console.log(\"اليوم يوجد خصم على المشروبات\");\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let guestCount = 14;\nlet visitDay = \"يوم عمل\";\nif ((guestCount >= 8) && (guestCount <= 16)) {\n  console.log(\"سيتم إرشادك إلى الغرفة الكبيرة\");\n}\nif (!(visitDay == \"عطلة\")) {\n  console.log(\"اليوم يوجد خصم على المشروبات\");\n}",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let guestCount = 14;\nlet visitDay = \"يوم عمل\";\nif ((guestCount >= 8) && (guestCount <= 16)) {\n  console.log(\"سيتم إرشادك إلى الغرفة الكبيرة\");\n}\nif (visitDay == \"عطلة\") {\n  console.log(\"اليوم يوجد خصم على المشروبات\");\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: حالة العمل: يوم عمل.",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 2.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let closedDay = \"15\";\nlet today = \"20\";\nlet salesStatus = \"يوم إغلاق اعتيادي\";\nif (today == closedDay) {\n  salesStatus = \"يوم عمل\";\n}\nconsole.log(\"حالة العمل: \" + salesStatus);",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let closedDay = \"15\";\nlet today = \"20\";\nlet salesStatus = \"يوم إغلاق اعتيادي\";\nif (!(today == closedDay)) {\n  salesStatus = \"يوم عمل\";\n}\nconsole.log(\"حالة العمل: \" + salesStatus);",
+        "ok": true
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let closedDay = \"15\";\nlet today = \"20\";\nlet salesStatus = \"يوم إغلاق اعتيادي\";\nif (today == closedDay) {\n  salesStatus = \"يوم عمل\";\n}\nconsole.log(\"حالة العمل: \" salesStatus);",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let closedDay = \"15\";\nlet today = \"20\";\nlet salesStatus = \"يوم إغلاق اعتيادي\";\nif (!(today == closedDay)) {\n  salesStatus = \"يوم عمل\";\n}\nconsole.log(\"حالة العمل: \" salesStatus);",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: ضمن ساعات العمل لا يمكننا تلبية الكمية المطلوبة",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 4.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let requiredQuantity = 55;\nlet currentTime = 10;\nlet response = \"سنقوم بتجهيز الكمية المطلوبة\";\nif ((requiredQuantity < 10) && (requiredQuantity > 50)) {\n  response = \"لا يمكننا تلبية الكمية المطلوبة\";\n}\nif ((currentTime >= 9) && (currentTime <= 12)) {\n  console.log(\"ضمن ساعات العمل\");\n  console.log(response);\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let requiredQuantity = 55;\nlet currentTime = 10;\nlet response = \"سنقوم بتجهيز الكمية المطلوبة\";\nif ((requiredQuantity < 10) && (requiredQuantity > 50)) {\n  response = \"لا يمكننا تلبية الكمية المطلوبة\";\n}\nif ((currentTime >= 9) || (currentTime <= 12)) {\n  console.log(\"ضمن ساعات العمل\");\n  console.log(response);\n}",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let requiredQuantity = 55;\nlet currentTime = 10;\nlet response = \"سنقوم بتجهيز الكمية المطلوبة\";\nif ((requiredQuantity < 10) || (requiredQuantity > 50)) {\n  response = \"لا يمكننا تلبية الكمية المطلوبة\";\n}\nif ((currentTime >= 9) && (currentTime <= 12)) {\n  console.log(\"ضمن ساعات العمل\");\n  console.log(response);\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let requiredQuantity = 55;\nlet currentTime = 10;\nlet response = \"سنقوم بتجهيز الكمية المطلوبة\";\nif ((requiredQuantity < 10) || (requiredQuantity > 50)) {\n  response = \"لا يمكننا تلبية الكمية المطلوبة\";\n}\nif ((currentTime >= 9) || (currentTime <= 12)) {\n  console.log(\"ضمن ساعات العمل\");\n  console.log(response);\n}",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: الضيوف الحاملون لتذاكر مقاعد A، يرجى الدخول عبر المدخل 1.",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let ticketType = \"A\";\nlet entrance;\nif ((ticketType == \"A\") || (ticketType == \"B\")) {\n  entrance = \"المدخل 1\";\n} else {\n  entrance = \"المدخل 2\";\n}\nconsole.log(\"الضيوف الحاملون لتذاكر مقاعد \" + ticketType + \" يرجى الدخول عبر \" + entrance);",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let ticketType = \"A\";\nlet entrance;\nif ((ticketType == \"A\") && (ticketType == \"B\")) {\n  entrance = \"المدخل 1\";\n} else {\n  entrance = \"المدخل 2\";\n}\nconsole.log(\"الضيوف الحاملون لتذاكر مقاعد \" + ticketType + \" يرجى الدخول عبر \" + entrance);",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let ticketType = \"A\";\nlet entrance;\nif ((ticketType == \"A\") || (ticketType == \"B\")) {\n  entrance = \"المدخل 1\";\n} else {\n  entrance = \"المدخل 2\";\n}\nconsole.log(\"الضيوف الحاملون لتذاكر مقاعد \" + ticketType + \"، يرجى الدخول عبر \" + entrance);",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let ticketType = \"A\";\nlet entrance;\nif ((ticketType == \"A\") && (ticketType == \"B\")) {\n  entrance = \"المدخل 1\";\n} else {\n  entrance = \"المدخل 2\";\n}\nconsole.log(\"الضيوف الحاملون لتذاكر مقاعد \" + ticketType + \"، يرجى الدخول عبر \" + entrance);",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: رقم الغرفة غير صحيح غرفتك المحجوزة في الطابق رقم 2",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 3.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let reservedRoomNum = 25;\nlet roomNum = 20;\nlet floorNum;\nif (reservedRoomNum != roomNum) {\n  console.log(\"رقم الغرفة غير صحيح\");\n}\nif (reservedRoomNum <= 20) {\n  floorNum = \"1\";\n} else if ((reservedRoomNum > 20) && (reservedRoomNum <= 40)) {\n  floorNum = \"2\";\n} else {\n  floorNum = \"3\";\n}\nconsole.log(\"غرفتك المحجوزة في الطابق رقم \" + floorNum);",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let reservedRoomNum = 25;\nlet roomNum = 20;\nlet floorNum;\nif (reservedRoomNum == roomNum) {\n  console.log(\"رقم الغرفة غير صحيح\");\n}\nif (reservedRoomNum <= 20) {\n  floorNum = \"1\";\n} else if ((reservedRoomNum > 20) && (reservedRoomNum <= 40)) {\n  floorNum = \"2\";\n} else {\n  floorNum = \"3\";\n}\nconsole.log(\"غرفتك المحجوزة في الطابق رقم\" + floorNum);",
+        "ok": false
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let reservedRoomNum = 25;\nlet roomNum = 20;\nlet floorNum;\nif (reservedRoomNum != roomNum) {\n  console.log(\"رقم الغرفة غير صحيح\");\n}\nif (reservedRoomNum <= 20) {\n  floorNum = \"1\";\n} else if ((reservedRoomNum > 20) && (reservedRoomNum <= 40)) {\n  floorNum = \"2\";\n} else {\n  floorNum = \"3\";\n}\nconsole.log(\"غرفتك المحجوزة في الطابق رقم \" + floorNum);",
+        "ok": true
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let reservedRoomNum = 25;\nlet roomNum = 20;\nlet floorNum;\nif (reservedRoomNum == roomNum) {\n  console.log(\"رقم الغرفة غير صحيح\");\n}\nif (reservedRoomNum <= 20) {\n  floorNum = \"1\";\n} else if ((reservedRoomNum > 20) && (reservedRoomNum <= 40)) {\n  floorNum = \"2\";\n} else {\n  floorNum = \"3\";\n}\nconsole.log(\"غرفتك المحجوزة في الطابق رقم\" + floorNum);",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: هذا القطار متجه إلى المحطة B.",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 2.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let trainCode = \"A123\";\nlet destination = \"المحطة B\";\nconsole.log(\"هذا القطار متجه إلى\" + destination);\nif ((destination == \"المحطة B\") || (trainCode == \"B456\")) {\n  console.log(\"A هذا القطار لا يتوقف في المحطة\");\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let trainCode = \"A123\";\nlet destination = \"المحطة B\";\nconsole.log(\"هذا القطار متجه إلى \" + destination);\nif ((destination == \"المحطة B\") && (trainCode == \"B456\")) {\n  console.log(\"A هذا القطار لا يتوقف في المحطة\");\n}",
+        "ok": true
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let trainCode = \"A123\";\nlet destination = \"المحطة B\";\nconsole.log(\"هذا القطار متجه إلى\" + destination);\nif ((destination == \"المحطة B\") && (trainCode == \"B456\")) {\n  console.log(\"A هذا القطار لا يتوقف في المحطة\");\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let trainCode = \"A123\";\nlet destination = \"المحطة B\";\nconsole.log(\"هذا القطار متجه إلى \" + destination);\nif ((destination == \"المحطة B\") && (trainCode == \"B456\")) {\n  console.log(\"A هذا القطار لا يتوقف في المحطة\");\n}",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "type": "تحديد البرنامج",
+    "q": "حدد البرنامج الذي يخرج: وصل مستوى البطارية إلى 10% يرجى شحن الجهاز",
+    "expected": null,
+    "code": null,
+    "hint": "اختر البرنامج الصحيح الذي يحقق الناتج المطلوب. راجع استخدام length والشروط المنطقية.",
+    "explanation": "الإجابة الصحيحة هي الاختيار رقم 2.",
+    "opts": [
+      {
+        "l": "A",
+        "t": "الاختيار 1",
+        "c": "let currentBatteryColor = \"أحمر\";\nlet fullyChargedBatteryColor = \"أزرق\";\nlet lowBatteryLevel = \"10%\";\nif (currentBatteryColor != fullyChargedBatteryColor) {\n  console.log(\"وصل مستوى البطارية إلى \" + lowBatteryLevel);\n  console.log(\"يرجى شحن الجهاز\");\n} else {\n  console.log(\"مستوى البطارية كافٍ\");\n}",
+        "ok": false
+      },
+      {
+        "l": "B",
+        "t": "الاختيار 2",
+        "c": "let currentBatteryColor = \"أحمر\";\nlet fullyChargedBatteryColor = \"أزرق\";\nlet lowBatteryLevel = \"10%\";\nif (currentBatteryColor != fullyChargedBatteryColor) {\n  console.log(\"وصل مستوى البطارية إلى \" + lowBatteryLevel);\n  console.log(\"يرجى شحن الجهاز\");\n} else {\n  console.log(\"مستوى البطارية كافٍ\");\n}",
+        "ok": true
+      },
+      {
+        "l": "C",
+        "t": "الاختيار 3",
+        "c": "let currentBatteryColor = \"أحمر\";\nlet fullyChargedBatteryColor = \"أزرق\";\nlet lowBatteryLevel = \"10%\";\nif (currentBatteryColor == fullyChargedBatteryColor) {\n  console.log(\"وصل مستوى البطارية إلى \" + lowBatteryLevel);\n  console.log(\"يرجى شحن الجهاز\");\n} else {\n  console.log(\"مستوى البطارية كافٍ\");\n}",
+        "ok": false
+      },
+      {
+        "l": "D",
+        "t": "الاختيار 4",
+        "c": "let currentBatteryColor = \"أحمر\";\nlet fullyChargedBatteryColor = \"أزرق\";\nlet lowBatteryLevel = \"10%\";\nif (currentBatteryColor == fullyChargedBatteryColor) {\n  console.log(\"وصل مستوى البطارية إلى \" + lowBatteryLevel);\n  console.log(\"يرجى شحن الجهاز\");\n} else {\n  console.log(\"مستوى البطارية كافٍ\");\n}",
+        "ok": false
+      }
+    ]
+  }
+];
+
+
+
+let CURRENT_EXAM_ID = 'exam1';
+const EXAMS = {
+  exam1: {
+    id: 'exam1',
+    name: 'الاختبار الأول',
+    durationMin: 40,
+    qs: QS_EXAM1
+  },
+  exam2: {
+    id: 'exam2',
+    name: 'الاختبار الثاني',
+    durationMin: 25,
+    qs: QS_EXAM2
+  }
+};
+
+let QS = EXAMS[CURRENT_EXAM_ID].qs;
+let SECS_DEFAULT = EXAMS[CURRENT_EXAM_ID].durationMin * 60;
+
 /* ═══════════════════════════════════════════════
    STATE  (backed by sessionStorage — survives F5)
 ═══════════════════════════════════════════════ */
@@ -1214,7 +2058,7 @@ let CQ    = 0;
 let ANS   = new Array(QS.length).fill(null);
 let HINT  = new Array(QS.length).fill(false);
 let RVEAL = new Array(QS.length).fill(false);
-let SECS  = 40 * 60;
+let SECS = SECS_DEFAULT;
 let TID   = null;
 let T0    = null;
 let T1    = null;
@@ -1226,7 +2070,7 @@ let CURRENT_SCREEN = 'intro';
 function saveState(){
   try{
     sessionStorage.setItem(SK, JSON.stringify({
-      CQ,ANS,HINT,RVEAL,SECS,T0,T1,CURRENT_SCREEN
+      CQ,ANS,HINT,RVEAL,SECS,T0,T1,CURRENT_SCREEN,CURRENT_EXAM_ID
     }));
   }catch(e){}
 }
@@ -1244,6 +2088,9 @@ function loadState(){
     T0   = s.T0   ?? null;
     T1   = s.T1   ?? null;
     CURRENT_SCREEN = s.CURRENT_SCREEN ?? 'intro';
+    CURRENT_EXAM_ID = s.CURRENT_EXAM_ID ?? 'exam1';
+    QS = EXAMS[CURRENT_EXAM_ID].qs;
+    SECS_DEFAULT = EXAMS[CURRENT_EXAM_ID].durationMin * 60;
     return true;
   }catch(e){ return false; }
 }
@@ -1294,12 +2141,21 @@ window.addEventListener('DOMContentLoaded', ()=>{
 /* ═══════════════════════════════════════════════
    START EXAM
 ═══════════════════════════════════════════════ */
-function startExam(){
+function startExam(examId){
+  // اختيار الامتحان
+  CURRENT_EXAM_ID = (examId && EXAMS[examId]) ? examId : 'exam1';
+  QS = EXAMS[CURRENT_EXAM_ID].qs;
+  SECS_DEFAULT = EXAMS[CURRENT_EXAM_ID].durationMin * 60;
+  // تحديث عنوان الهيدر
+  const ttl = EXAMS[CURRENT_EXAM_ID].name;
+  const logoSpan = document.getElementById('examTitleHdr');
+  if(logoSpan) logoSpan.textContent = 'نسخة تجريبية لمحاكاة امتحان التوفاس - ' + ttl;
+
   clearState();
   CQ=0; ANS=new Array(QS.length).fill(null);
   HINT=new Array(QS.length).fill(false);
   RVEAL=new Array(QS.length).fill(false);
-  SECS=40*60; T0=Date.now(); T1=null;
+  SECS = SECS_DEFAULT; T0=Date.now(); T1=null;
   show('S-exam');
   buildDots();
   render();
@@ -1631,11 +2487,11 @@ function restartExam(){
   ANS=new Array(QS.length).fill(null);
   HINT=new Array(QS.length).fill(false);
   RVEAL=new Array(QS.length).fill(false);
-  SECS=40*60;
+  SECS = SECS_DEFAULT;
   T0=T1=null;
   FILTER='all';
   CURRENT_SCREEN='intro';
-  $('timer-txt').textContent='40:00';
+  $('timer-txt').textContent = fmt(SECS);
   $('timer-box').className='timer-box';
   // reset review tabs
   document.querySelectorAll('.rtab').forEach((b,i)=>{ b.classList.toggle('on',i===0); });
